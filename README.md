@@ -1,0 +1,566 @@
+# Smart Review AI
+
+Smart Review AI analyzes BoardGameGeek review text and transforms unstructured reviews into structured game insights such as:
+
+- Sentiment
+- Perceived difficulty
+- Common themes/aspects
+- Common complaints
+- Aggregated insights per game
+
+The project is designed to run independently first and later be integrated with the Flower Power application through a small REST API.
+
+---
+
+## 1. Requirements
+
+Install the following before setting up the project:
+
+- Git
+- Python 3.13.15
+- `uv`
+
+You can check Git with:
+
+```bash
+git --version
+```
+
+You can check Python with:
+
+```bash
+python --version
+```
+
+The expected Python version is:
+
+```text
+Python 3.13.15
+```
+
+You can check whether `uv` is installed with:
+
+```bash
+uv --version
+```
+
+---
+
+## 2. Install `uv`
+
+If `uv` is already installed, skip this step.
+
+### Windows PowerShell
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Close and reopen PowerShell, then verify:
+
+```powershell
+uv --version
+```
+
+---
+
+## 3. Clone the repository
+
+Clone the GitHub repository:
+
+```bash
+git clone <REPOSITORY_URL>
+```
+
+Move into the project directory:
+
+```bash
+cd smart-review-ai
+```
+
+Replace `<REPOSITORY_URL>` with the actual GitHub repository URL.
+
+---
+
+## 4. Install the required Python version
+
+The project uses:
+
+```text
+Python 3.13.15
+```
+
+The required version is also stored in:
+
+```text
+.python-version
+```
+
+To make sure the correct Python version is available, run:
+
+```bash
+uv python install 3.13.15
+```
+
+Verify it with:
+
+```bash
+uv run python --version
+```
+
+Expected output:
+
+```text
+Python 3.13.15
+```
+
+---
+
+## 5. Create and synchronize the virtual environment
+
+Run:
+
+```bash
+uv sync
+```
+
+This command:
+
+1. Creates `.venv` if it does not already exist.
+2. Installs the dependencies from `pyproject.toml`.
+3. Uses the exact dependency versions stored in `uv.lock`.
+
+You do **not** need to commit `.venv` to GitHub.
+
+You also do not need to manually activate the environment when using commands through `uv run`.
+
+For example:
+
+```bash
+uv run python --version
+```
+
+runs Python inside the project environment automatically.
+
+---
+
+## 6. Project structure
+
+The project is organized approximately like this:
+
+```text
+smart-review-ai/
+│
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── sample/
+│
+├── scripts/
+│   └── prepare_reviews.py
+│
+├── src/
+│   └── smart_review_ai/
+│       ├── __init__.py
+│       ├── main.py
+│       │
+│       ├── api/
+│       │   ├── __init__.py
+│       │   └── routes.py
+│       │
+│       ├── analysis/
+│       │   ├── __init__.py
+│       │   ├── sentiment.py
+│       │   ├── difficulty.py
+│       │   ├── themes.py
+│       │   └── complaints.py
+│       │
+│       ├── aggregation/
+│       │   ├── __init__.py
+│       │   └── aggregator.py
+│       │
+│       ├── models/
+│       │   ├── __init__.py
+│       │   ├── review.py
+│       │   ├── review_analysis.py
+│       │   └── game_insights.py
+│       │
+│       └── services/
+│           ├── __init__.py
+│           └── review_service.py
+│
+├── tests/
+│
+├── .env.example
+├── .gitignore
+├── .python-version
+├── pyproject.toml
+├── uv.lock
+└── README.md
+```
+
+---
+
+## 7. Download the BoardGameGeek dataset
+
+The project uses the BoardGameGeek Reviews dataset from Kaggle:
+
+```text
+https://www.kaggle.com/datasets/jvanelteren/boardgamegeek-reviews
+```
+
+Download:
+
+```text
+bgg-15m-reviews.csv
+```
+
+Place the file here:
+
+```text
+data/raw/bgg-15m-reviews.csv
+```
+
+The final location should be:
+
+```text
+smart-review-ai/
+└── data/
+    └── raw/
+        └── bgg-15m-reviews.csv
+```
+
+The raw dataset is intentionally not committed to GitHub because it is very large.
+
+---
+
+## 8. Prepare the review dataset
+
+The raw BoardGameGeek dataset contains rows without written review comments.
+
+The preprocessing script filters the dataset and keeps only rows where `comment` contains text.
+
+Run:
+
+```bash
+uv run python scripts/prepare_reviews.py
+```
+
+The script reads:
+
+```text
+data/raw/bgg-15m-reviews.csv
+```
+
+and generates the processed file in:
+
+```text
+data/processed/
+```
+
+For example:
+
+```text
+data/processed/reviews_with_comments.csv
+```
+
+The preprocessing script should not modify the original raw dataset.
+
+The intended data flow is:
+
+```text
+Kaggle dataset
+      ↓
+data/raw/bgg-15m-reviews.csv
+      ↓
+scripts/prepare_reviews.py
+      ↓
+data/processed/reviews_with_comments.csv
+      ↓
+Smart Review AI analysis pipeline
+```
+
+---
+
+## 9. Start the FastAPI application
+
+Run:
+
+```bash
+uv run uvicorn smart_review_ai.main:app --reload --app-dir src
+```
+
+You should see output similar to:
+
+```text
+Uvicorn running on http://127.0.0.1:8000
+```
+
+Open the application in a browser:
+
+```text
+http://localhost:8000
+```
+
+---
+
+## 10. Open the API documentation
+
+FastAPI automatically generates interactive API documentation.
+
+Open:
+
+```text
+http://localhost:8000/docs
+```
+
+This page allows you to inspect and test the available API endpoints.
+
+Current/planned endpoints include:
+
+```text
+GET  /health
+POST /api/reviews/analyze
+GET  /api/games/{game_id}/insights
+```
+
+---
+
+## 11. Check the health endpoint
+
+With the application running, open:
+
+```text
+http://localhost:8000/health
+```
+
+Expected response:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+---
+
+## 12. Run the tests
+
+Run all tests with:
+
+```bash
+uv run pytest
+```
+
+A successful run should finish without test failures.
+
+Whenever possible, run the tests before opening a pull request.
+
+---
+
+## 13. Run the linter
+
+Check the project with Ruff:
+
+```bash
+uv run ruff check .
+```
+
+To automatically fix issues that Ruff can safely correct:
+
+```bash
+uv run ruff check . --fix
+```
+
+Format the code with:
+
+```bash
+uv run ruff format .
+```
+
+Before opening a pull request, it is recommended to run:
+
+```bash
+uv run ruff check .
+uv run pytest
+```
+
+---
+
+## 14. Add a new dependency
+
+Do not install project dependencies with plain `pip install`.
+
+Use `uv add` instead.
+
+For example:
+
+```bash
+uv add pandas
+```
+
+For a development-only dependency:
+
+```bash
+uv add --dev pytest
+```
+
+This updates:
+
+```text
+pyproject.toml
+uv.lock
+```
+
+Commit both files when dependency changes are made.
+
+---
+
+## 15. Updating your local environment after pulling changes
+
+When another teammate changes project dependencies, pull the latest changes:
+
+```bash
+git pull
+```
+
+Then run:
+
+```bash
+uv sync
+```
+
+This updates your local `.venv` so it matches the versions stored in `uv.lock`.
+
+---
+
+## 16. Environment variables
+
+Local environment variables should be stored in:
+
+```text
+.env
+```
+
+Do not commit `.env`.
+
+If the application needs a new environment variable, document its name in:
+
+```text
+.env.example
+```
+
+Example:
+
+```text
+APP_ENV=development
+```
+
+Never place passwords, API keys, tokens, or other secrets directly in Git-tracked files.
+
+---
+
+## 17. Files that should not be committed
+
+The following should stay local:
+
+```text
+.venv/
+.env
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+data/raw/*.csv
+data/processed/*.csv
+```
+
+The following should be committed:
+
+```text
+.python-version
+pyproject.toml
+uv.lock
+README.md
+src/
+scripts/
+tests/
+.env.example
+```
+
+---
+
+## 18. Quick start
+
+For a teammate setting up the project for the first time, the normal sequence is:
+
+```bash
+git clone <REPOSITORY_URL>
+cd smart-review-ai
+
+uv python install 3.13.15
+uv sync
+```
+
+Download the BoardGameGeek dataset and place:
+
+```text
+bgg-15m-reviews.csv
+```
+
+inside:
+
+```text
+data/raw/
+```
+
+Prepare the data:
+
+```bash
+uv run python scripts/prepare_reviews.py
+```
+
+Run the tests:
+
+```bash
+uv run pytest
+```
+
+Start the API:
+
+```bash
+uv run uvicorn smart_review_ai.main:app --reload --app-dir src
+```
+
+Then open:
+
+```text
+http://localhost:8000/docs
+```
+
+---
+
+## 19. Main development pipeline
+
+The project is intended to evolve toward the following flow:
+
+```text
+BoardGameGeek reviews
+        ↓
+Dataset preparation
+        ↓
+Sentiment analysis
+        ↓
+Difficulty classification
+        ↓
+Theme/aspect extraction
+        ↓
+Complaint detection
+        ↓
+Aggregation per game
+        ↓
+Game insights
+        ↓
+FastAPI
+```
+
+The initial version can work entirely from prepared local review data. Integration with the main Flower Power application can be added later through the API.
