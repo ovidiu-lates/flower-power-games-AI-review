@@ -8,13 +8,24 @@ OUTPUT_FILE = Path("data/processed/reviews_with_comments.csv")
 CHUNK_SIZE = 100_000
 
 
+def normalize_text(text: str) -> str:
+    text = text.lower()
+    text = " ".join(text.split())
+    return text
+
+
 def prepare_reviews() -> None:
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
     first_chunk = True
 
     for chunk in pd.read_csv(RAW_FILE, chunksize=CHUNK_SIZE):
-        reviews = chunk[chunk["comment"].notna() & chunk["comment"].str.strip().ne("")]
+        reviews = chunk[
+            chunk["comment"].notna()
+            & chunk["comment"].str.strip().ne("")
+        ].copy()
+
+        reviews["comment"] = reviews["comment"].apply(normalize_text)
 
         reviews.to_csv(
             OUTPUT_FILE,
