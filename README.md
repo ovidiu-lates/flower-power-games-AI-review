@@ -282,7 +282,95 @@ Smart Review AI analysis pipeline
 
 ---
 
-## 9. Start the FastAPI application
+## 9. Configure and start the database
+
+Copy the environment template:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Update `.env` with the SQL Server password you want to use. The password in
+`DATABASE_URL` must be URL-encoded. For example, `!` becomes `%21`.
+
+Start SQL Server with Docker:
+
+```powershell
+docker compose up -d
+```
+
+The container listens on `localhost:1434`. The first time you set up the
+project, create the `FlowerPowerGames` database on that same SQL Server
+instance. You can do this in SSMS by connecting to `localhost,1434` as `sa`
+and running:
+
+```sql
+CREATE DATABASE FlowerPowerGames;
+```
+
+Make sure SSMS uses the same host, port, username, and password as `.env`.
+Connecting to another local SQL Server instance will not make the database
+available to this project.
+
+Apply all migrations that are already committed to the repository:
+
+```powershell
+uv run alembic upgrade head
+```
+
+This creates or updates the tables in `FlowerPowerGames`.
+
+---
+
+## 10. Work with migrations
+
+Run this sequence whenever you start working on the project:
+
+```powershell
+docker compose up -d
+uv sync
+uv run alembic upgrade head
+```
+
+When you change a SQLAlchemy model, generate a migration from the model
+metadata:
+
+```powershell
+uv run alembic revision --autogenerate -m "describe the schema change"
+```
+
+Review the generated file in `migrations/versions/`. Autogeneration should be
+checked manually, especially for renamed or removed columns. Then apply it:
+
+```powershell
+uv run alembic upgrade head
+```
+
+Commit the migration file with the model changes. Other developers should
+pull the migration and run `uv run alembic upgrade head`; they should not
+regenerate the same migration.
+
+Useful migration commands:
+
+```powershell
+# Show the current database revision
+uv run alembic current
+
+# Show the migration history
+uv run alembic history
+
+# Roll back one migration locally
+uv run alembic downgrade -1
+```
+
+Do not delete or edit an already-applied migration to correct a later change.
+Create a new migration instead. If the database is disposable and you need a
+clean local database, use `docker compose down -v`, start the container again,
+recreate `FlowerPowerGames`, and run `uv run alembic upgrade head`.
+
+---
+
+## 11. Start the FastAPI application
 
 Run:
 
@@ -304,7 +392,7 @@ http://localhost:8000
 
 ---
 
-## 10. Open the API documentation
+## 12. Open the API documentation
 
 FastAPI automatically generates interactive API documentation.
 
@@ -320,13 +408,13 @@ Current/planned endpoints include:
 
 ```text
 GET  /health
-POST /api/reviews/analyze
-GET  /api/games/{game_id}/insights
+POST /api/reviews
+GET  /api/reviews/{review_id}
 ```
 
 ---
 
-## 11. Check the health endpoint
+## 13. Check the health endpoint
 
 With the application running, open:
 
@@ -344,7 +432,7 @@ Expected response:
 
 ---
 
-## 12. Run the tests
+## 14. Run the tests
 
 Run all tests with:
 
@@ -358,7 +446,7 @@ Whenever possible, run the tests before opening a pull request.
 
 ---
 
-## 13. Run the linter
+## 15. Run the linter
 
 Check the project with Ruff:
 
@@ -387,7 +475,7 @@ uv run pytest
 
 ---
 
-## 14. Add a new dependency
+## 16. Add a new dependency
 
 Do not install project dependencies with plain `pip install`.
 
@@ -416,7 +504,7 @@ Commit both files when dependency changes are made.
 
 ---
 
-## 15. Updating your local environment after pulling changes
+## 17. Updating your local environment after pulling changes
 
 When another teammate changes project dependencies, pull the latest changes:
 
@@ -434,7 +522,7 @@ This updates your local `.venv` so it matches the versions stored in `uv.lock`.
 
 ---
 
-## 16. Environment variables
+## 18. Environment variables
 
 Local environment variables should be stored in:
 
@@ -460,7 +548,7 @@ Never place passwords, API keys, tokens, or other secrets directly in Git-tracke
 
 ---
 
-## 17. Files that should not be committed
+## 19. Files that should not be committed
 
 The following should stay local:
 
@@ -489,7 +577,7 @@ tests/
 
 ---
 
-## 18. Quick start
+## 20. Quick start
 
 For a teammate setting up the project for the first time, the normal sequence is:
 
