@@ -5,9 +5,9 @@ from smart_review_ai.models.liked_aspect import LikedAspect
 from smart_review_ai.models.review import Review
 
 __all__ = [
+    "CommonComplaint",
     "Game",
-    "Review",
     "GameAnalysis",
     "LikedAspect",
-    "CommonComplaint",
+    "Review",
 ]

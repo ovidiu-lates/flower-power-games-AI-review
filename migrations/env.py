@@ -1,13 +1,12 @@
-from logging.config import fileConfig
 import os
+from logging.config import fileConfig
 
 from alembic import context
 from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 
-from smart_review_ai.db.database import Base
 import smart_review_ai.models  # noqa: F401
-
+from smart_review_ai.db.database import Base
 
 # Load variables from .env
 load_dotenv()

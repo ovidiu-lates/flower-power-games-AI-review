@@ -408,8 +408,6 @@ Current/planned endpoints include:
 
 ```text
 GET  /health
-POST /api/reviews
-GET  /api/reviews/{review_id}
 ```
 
 ---
