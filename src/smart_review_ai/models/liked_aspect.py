@@ -1,23 +1,23 @@
-from sqlalchemy import ForeignKey, Text
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from smart_review_ai.db.database import Base
 
 
-class Review(Base):
-    __tablename__ = "reviews"
+class LikedAspect(Base):
+    __tablename__ = "liked_aspects"
 
     id: Mapped[int] = mapped_column(
         primary_key=True,
         autoincrement=True,
     )
 
-    game_id: Mapped[int] = mapped_column(
-        ForeignKey("games.id"),
+    game_analysis_id: Mapped[int] = mapped_column(
+        ForeignKey("game_analysis.id"),
         nullable=False,
     )
 
-    comment: Mapped[str] = mapped_column(
-        Text,
+    aspect: Mapped[str] = mapped_column(
+        String(500),
         nullable=False,
     )

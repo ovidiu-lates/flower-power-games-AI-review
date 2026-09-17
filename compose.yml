@@ -1,0 +1,22 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: flower-power-games-ai-review-sql
+    hostname: flower-power-games-ai-review-sql
+
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
+
+    ports:
+      - "1434:1433"
+
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+    name: flower-power-games-ai-review-sql-data

@@ -1,9 +1,13 @@
-from .game_insights import GameInsights
-from .review import Review
-from .review_analysis import ReviewAnalysis
+from smart_review_ai.models.common_complaint import CommonComplaint
+from smart_review_ai.models.game import Game
+from smart_review_ai.models.game_analysis import GameAnalysis
+from smart_review_ai.models.liked_aspect import LikedAspect
+from smart_review_ai.models.review import Review
 
 __all__ = [
-    "GameInsights",
+    "CommonComplaint",
+    "Game",
+    "GameAnalysis",
+    "LikedAspect",
     "Review",
-    "ReviewAnalysis",
 ]
