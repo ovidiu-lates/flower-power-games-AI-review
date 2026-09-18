@@ -17,4 +17,4 @@ def test_not_fun_is_classified_as_negative():
 def test_very_confusing_is_classified_as_hard():
     result = classify_difficulty("The rules are very confusing.")
 
-    assert result == "hard"
+    assert result == "very_hard"
