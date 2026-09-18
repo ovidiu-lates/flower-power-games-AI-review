@@ -1,8 +1,3 @@
-from fastapi import APIRouter
+from smart_review_ai.api.router import router
 
-router = APIRouter()
-
-
-@router.get("/health")
-def health():
-    return {"status": "ok"}
+__all__ = ["router"]
