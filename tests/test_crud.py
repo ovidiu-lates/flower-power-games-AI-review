@@ -2,11 +2,18 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from smart_review_ai.analysis.review_analyzer import ReviewAnalysisResult
+from smart_review_ai.models.game import Game
 from smart_review_ai.models.game_insight import GameInsight
 from smart_review_ai.models.game_insight_complaint import GameInsightComplaint
 from smart_review_ai.models.game_insight_liked_aspect import GameInsightLikedAspect
+from smart_review_ai.models.review import Review
+from smart_review_ai.models.user import User
+from smart_review_ai.services.game_insights_service import GameInsightsService
+from smart_review_ai.services.review_service import ReviewService
 
 
 def auth_headers(token: str) -> dict[str, str]:
@@ -31,11 +38,36 @@ def create_game(client: TestClient, token: str) -> dict[str, Any]:
     return response.json()
 
 
+class FakeReviewAnalyzer:
+    def __init__(self, *results: ReviewAnalysisResult) -> None:
+        self.results = list(results)
+
+    def analyze(self, *, content: str, rating: int) -> ReviewAnalysisResult:
+        assert content
+        assert rating
+        return self.results.pop(0)
+
+
+class FakeGameInsightExplainer:
+    def __init__(self, explanation: str = "Players mostly like this game.") -> None:
+        self.explanation = explanation
+        self.review_count = 0
+
+    def explain(
+        self, *, game_name: str, insight: GameInsight, reviews: list[Review]
+    ) -> str:
+        assert game_name
+        assert insight.total_reviews
+        self.review_count = len(reviews)
+        return self.explanation
+
+
 def test_protected_domain_routes_require_authentication(client: TestClient) -> None:
     assert client.get("/games").status_code == 401
     assert client.post("/games", json=game_payload()).status_code == 401
     assert client.get(f"/games/{uuid4()}/reviews").status_code == 401
     assert client.get(f"/games/{uuid4()}/insight").status_code == 401
+    assert client.get(f"/games/{uuid4()}/insight/explanation").status_code == 401
 
 
 def test_game_read_and_create_only(authenticated_client: tuple[TestClient, str]) -> None:
@@ -96,6 +128,173 @@ def test_game_scoped_review_creation_and_listing(
         f"/reviews/{review['id']}", json={"rating": 9}, headers=headers
     ).status_code == 405
     assert client.delete(f"/reviews/{review['id']}", headers=headers).status_code == 405
+
+
+def test_review_creation_analyzes_review_and_updates_game_insight(
+    db_session: Session,
+) -> None:
+    user = User(
+        username="reviewer",
+        email="reviewer@example.com",
+        password_hash="not-used",
+    )
+    game = Game(**game_payload("Terraforming Mars"))
+    db_session.add_all([user, game])
+    db_session.commit()
+
+    analyzer = FakeReviewAnalyzer(
+        ReviewAnalysisResult(
+            sentiment="positive",
+            confidence=0.94,
+            perceived_difficulty="hard",
+            liked_aspects=["strategy", "components"],
+            complaints=["slow setup"],
+        )
+    )
+
+    review = ReviewService(db_session, analyzer=analyzer).create_review(
+        user_id=user.id,
+        game_id=game.id,
+        rating=9,
+        content="Great strategy and components, but setup is slow",
+    )
+    insight = GameInsightsService(db_session).get_game_insight(game.id)
+
+    assert review.analysis is not None
+    assert review.analysis.sentiment == "positive"
+    assert review.analysis.perceived_difficulty == "hard"
+    assert [aspect.aspect for aspect in review.analysis.liked_aspects] == [
+        "strategy",
+        "components",
+    ]
+    assert [complaint.complaint for complaint in review.analysis.complaints] == [
+        "slow setup"
+    ]
+    assert insight.total_reviews == 1
+    assert insight.average_rating == 9
+    assert insight.positive_percentage == 100
+    assert insight.hard_percentage == 100
+    assert [(item.aspect, item.occurrence_count) for item in insight.liked_aspects] == [
+        ("strategy", 1),
+        ("components", 1),
+    ]
+    assert [(item.complaint, item.occurrence_count) for item in insight.complaints] == [
+        ("slow setup", 1)
+    ]
+
+
+def test_review_creation_updates_existing_game_insight(
+    db_session: Session,
+) -> None:
+    user = User(
+        username="insight-reviewer",
+        email="insight-reviewer@example.com",
+        password_hash="not-used",
+    )
+    game = Game(**game_payload("Ark Nova"))
+    db_session.add_all([user, game])
+    db_session.commit()
+
+    analyzer = FakeReviewAnalyzer(
+        ReviewAnalysisResult(
+            sentiment="positive",
+            confidence=0.9,
+            perceived_difficulty="hard",
+            liked_aspects=["replayability"],
+            complaints=[],
+        ),
+        ReviewAnalysisResult(
+            sentiment="neutral",
+            confidence=0.8,
+            perceived_difficulty="medium",
+            liked_aspects=["replayability"],
+            complaints=["downtime"],
+        ),
+    )
+
+    ReviewService(db_session, analyzer=analyzer).create_review(
+        user_id=user.id,
+        game_id=game.id,
+        rating=9,
+        content="Great replay value",
+    )
+    first_insight = GameInsightsService(db_session).get_game_insight(game.id)
+
+    ReviewService(db_session, analyzer=analyzer).create_review(
+        user_id=user.id,
+        game_id=game.id,
+        rating=5,
+        content="Still replayable, but has downtime",
+    )
+    updated_insight = GameInsightsService(db_session).get_game_insight(game.id)
+    all_insights = list(db_session.scalars(select(GameInsight)))
+
+    assert updated_insight.id == first_insight.id
+    assert len(all_insights) == 1
+    assert updated_insight.total_reviews == 2
+    assert updated_insight.average_rating == 7
+    assert updated_insight.positive_percentage == 50
+    assert updated_insight.neutral_percentage == 50
+    assert updated_insight.hard_percentage == 50
+    assert updated_insight.medium_percentage == 50
+    assert [(item.aspect, item.occurrence_count) for item in updated_insight.liked_aspects] == [
+        ("replayability", 2)
+    ]
+    assert [(item.complaint, item.occurrence_count) for item in updated_insight.complaints] == [
+        ("downtime", 1)
+    ]
+
+
+def test_game_insight_explanation_uses_requested_review_limit(
+    db_session: Session,
+) -> None:
+    user = User(
+        username="explanation-reviewer",
+        email="explanation-reviewer@example.com",
+        password_hash="not-used",
+    )
+    game = Game(**game_payload("Wingspan"))
+    db_session.add_all([user, game])
+    db_session.commit()
+
+    analyzer = FakeReviewAnalyzer(
+        ReviewAnalysisResult(
+            sentiment="positive",
+            confidence=0.9,
+            perceived_difficulty="medium",
+            liked_aspects=["theme"],
+            complaints=[],
+        ),
+        ReviewAnalysisResult(
+            sentiment="positive",
+            confidence=0.85,
+            perceived_difficulty="medium",
+            liked_aspects=["components"],
+            complaints=[],
+        ),
+    )
+    review_service = ReviewService(db_session, analyzer=analyzer)
+    review_service.create_review(
+        user_id=user.id,
+        game_id=game.id,
+        rating=8,
+        content="Beautiful theme",
+    )
+    review_service.create_review(
+        user_id=user.id,
+        game_id=game.id,
+        rating=9,
+        content="Great components",
+    )
+
+    explainer = FakeGameInsightExplainer("Players praise the theme and components.")
+    explanation, review_count = GameInsightsService(
+        db_session, explainer=explainer
+    ).explain_game_insight(game.id, review_limit=1)
+
+    assert explanation == "Players praise the theme and components."
+    assert review_count == 1
+    assert explainer.review_count == 1
 
 
 def test_game_scoped_review_rejects_unknown_game(

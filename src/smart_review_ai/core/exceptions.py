@@ -6,6 +6,10 @@ class EntityNotFoundError(Exception):
     pass
 
 
+class ServiceUnavailableError(Exception):
+    pass
+
+
 class InvalidCredentialsError(Exception):
     pass
 

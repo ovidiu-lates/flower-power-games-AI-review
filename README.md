@@ -536,11 +536,14 @@ If the application needs a new environment variable, document its name in:
 .env.example
 ```
 
-Example:
+OpenAI review analysis uses these variables:
 
 ```text
-APP_ENV=development
+OPENAI_API_KEY=replace-with-your-openai-api-key
+OPENAI_MODEL=gpt-4o-mini
 ```
+
+`OPENAI_MODEL` is optional. If it is not set, the application uses `gpt-4o-mini`.
 
 Never place passwords, API keys, tokens, or other secrets directly in Git-tracked files.
 

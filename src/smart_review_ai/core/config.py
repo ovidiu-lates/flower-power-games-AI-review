@@ -16,6 +16,8 @@ class Settings:
     jwt_access_token_expire_minutes: int = int(
         os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30")
     )
+    openai_api_key: str | None = os.getenv("OPENAI_API_KEY")
+    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 
 settings = Settings()
