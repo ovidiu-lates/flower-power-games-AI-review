@@ -1,3 +1,4 @@
+from typing import Literal
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -31,4 +32,27 @@ class GameService:
 
     def list_games(self) -> list[Game]:
         return self.games.list()
+
+    def list_games_paginated(
+        self,
+        page: int,
+        page_size: int,
+        *,
+        search: str | None = None,
+        min_players: int | None = None,
+        min_play_time: int | None = None,
+        max_play_time: int | None = None,
+        difficulty: Literal["easy", "medium", "hard"] | None = None,
+        sort: Literal["top_rated"] | None = None,
+    ) -> tuple[list[Game], int]:
+        return self.games.list_paginated(
+            page,
+            page_size,
+            search=search,
+            min_players=min_players,
+            min_play_time=min_play_time,
+            max_play_time=max_play_time,
+            difficulty=difficulty,
+            sort=sort,
+        )
 

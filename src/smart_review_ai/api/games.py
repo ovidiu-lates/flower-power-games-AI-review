@@ -1,7 +1,7 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from smart_review_ai.api.dependencies.auth import get_current_active_user
@@ -11,7 +11,7 @@ from smart_review_ai.core.exceptions import (
     EntityNotFoundError,
 )
 from smart_review_ai.models.user import User
-from smart_review_ai.schemas.game import GameCreate, GameResponse
+from smart_review_ai.schemas.game import GameCreate, GameResponse, PaginatedGameResponse
 from smart_review_ai.schemas.game_insight import GameInsightResponse
 from smart_review_ai.schemas.review import ReviewCreate, ReviewResponse
 from smart_review_ai.services.game_insights_service import GameInsightsService
@@ -36,9 +36,37 @@ def create_game(request: GameCreate, session: SessionDependency, _: AuthDependen
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
-@router.get("", response_model=list[GameResponse])
-def list_games(session: SessionDependency, _: AuthDependency) -> list[GameResponse]:
-    return GameService(session).list_games()
+@router.get("", response_model=PaginatedGameResponse)
+def list_games(
+    session: SessionDependency,
+    _: AuthDependency,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    search: str | None = Query(default=None, max_length=255),
+    min_players: int | None = Query(default=None, ge=1),
+    min_play_time: int | None = Query(default=None, ge=0),
+    max_play_time: int | None = Query(default=None, ge=0),
+    difficulty: Literal["easy", "medium", "hard"] | None = Query(default=None),
+    sort: Literal["top_rated"] | None = Query(default=None),
+) -> PaginatedGameResponse:
+    games, total = GameService(session).list_games_paginated(
+        page,
+        page_size,
+        search=search,
+        min_players=min_players,
+        min_play_time=min_play_time,
+        max_play_time=max_play_time,
+        difficulty=difficulty,
+        sort=sort,
+    )
+    total_pages = (total + page_size - 1) // page_size
+    return PaginatedGameResponse(
+        items=games,
+        page=page,
+        page_size=page_size,
+        total=total,
+        total_pages=total_pages,
+    )
 
 
 @router.get("/{game_id}", response_model=GameResponse)

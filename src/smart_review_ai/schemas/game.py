@@ -27,3 +27,11 @@ class GameResponse(BaseModel):
     max_play_time: int
     created_at: datetime
     updated_at: datetime
+
+
+class PaginatedGameResponse(BaseModel):
+    items: list[GameResponse]
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
