@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from smart_review_ai.api.routes import router
+from smart_review_ai.api.router import router
 
 app = FastAPI(
     title="Smart Review AI",
