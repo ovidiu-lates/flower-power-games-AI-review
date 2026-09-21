@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, String, Text, Uuid
+from sqlalchemy import DateTime, Unicode, UnicodeText, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from smart_review_ai.db.database import Base
@@ -24,13 +24,13 @@ class Game(Base):
     )
 
     name: Mapped[str] = mapped_column(
-        String(255),
+        Unicode(255),
         unique=True,
         nullable=False,
     )
 
-    description: Mapped[str] = mapped_column(Text, nullable=False)
-    image_url: Mapped[str] = mapped_column(String(2048), nullable=False)
+    description: Mapped[str] = mapped_column(UnicodeText, nullable=False)
+    image_url: Mapped[str] = mapped_column(Unicode(2048), nullable=False)
     min_players: Mapped[int] = mapped_column(nullable=False)
     max_players: Mapped[int] = mapped_column(nullable=False)
     min_play_time: Mapped[int] = mapped_column(nullable=False)

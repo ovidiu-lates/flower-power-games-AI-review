@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from smart_review_ai.api.dependencies.auth import get_current_active_user
@@ -9,14 +9,10 @@ from smart_review_ai.api.dependencies.database import get_db
 from smart_review_ai.core.exceptions import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
-    ServiceUnavailableError,
 )
 from smart_review_ai.models.user import User
 from smart_review_ai.schemas.game import GameCreate, GameResponse
-from smart_review_ai.schemas.game_insight import (
-    GameInsightExplanationResponse,
-    GameInsightResponse,
-)
+from smart_review_ai.schemas.game_insight import GameInsightResponse
 from smart_review_ai.schemas.review import ReviewCreate, ReviewResponse
 from smart_review_ai.services.game_insights_service import GameInsightsService
 from smart_review_ai.services.game_service import GameService
@@ -96,32 +92,3 @@ def get_game_insight(
         return GameInsightsService(session).get_game_insight(game_id)
     except EntityNotFoundError as error:
         raise _not_found(error) from error
-
-
-@router.get(
-    "/{game_id}/insight/explanation",
-    response_model=GameInsightExplanationResponse,
-)
-def explain_game_insight(
-    game_id: UUID,
-    session: SessionDependency,
-    _: AuthDependency,
-    review_limit: int = Query(default=5, ge=1, le=20),
-) -> GameInsightExplanationResponse:
-    try:
-        explanation, review_count = GameInsightsService(session).explain_game_insight(
-            game_id=game_id,
-            review_limit=review_limit,
-        )
-        return GameInsightExplanationResponse(
-            game_id=game_id,
-            review_count=review_count,
-            explanation=explanation,
-        )
-    except EntityNotFoundError as error:
-        raise _not_found(error) from error
-    except ServiceUnavailableError as error:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(error),
-        ) from error
