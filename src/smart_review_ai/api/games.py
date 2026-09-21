@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from smart_review_ai.api.dependencies.auth import get_current_active_user
@@ -11,8 +11,12 @@ from smart_review_ai.core.exceptions import (
     EntityNotFoundError,
 )
 from smart_review_ai.models.user import User
-from smart_review_ai.schemas.game import GameCreate, GameResponse, GameUpdate
+from smart_review_ai.schemas.game import GameCreate, GameResponse
+from smart_review_ai.schemas.game_insight import GameInsightResponse
+from smart_review_ai.schemas.review import ReviewCreate, ReviewResponse
+from smart_review_ai.services.game_insights_service import GameInsightsService
 from smart_review_ai.services.game_service import GameService
+from smart_review_ai.services.review_service import ReviewService
 
 router = APIRouter(prefix="/games", tags=["games"])
 SessionDependency = Annotated[Session, Depends(get_db)]
@@ -45,28 +49,46 @@ def get_game(game_id: UUID, session: SessionDependency, _: AuthDependency) -> Ga
         raise _not_found(error) from error
 
 
-@router.patch("/{game_id}", response_model=GameResponse)
-def update_game(
+@router.get("/{game_id}/reviews", response_model=list[ReviewResponse])
+def list_game_reviews(
     game_id: UUID,
-    request: GameUpdate,
     session: SessionDependency,
     _: AuthDependency,
-) -> GameResponse:
+) -> list[ReviewResponse]:
     try:
-        return GameService(session).update_game(
-            game_id, request.model_dump(exclude_unset=True)
+        return ReviewService(session).list_reviews_for_game(game_id)
+    except EntityNotFoundError as error:
+        raise _not_found(error) from error
+
+
+@router.post(
+    "/{game_id}/reviews",
+    response_model=ReviewResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_game_review(
+    game_id: UUID,
+    request: ReviewCreate,
+    session: SessionDependency,
+    current_user: AuthDependency,
+) -> ReviewResponse:
+    try:
+        return ReviewService(session).create_review(
+            user_id=current_user.id,
+            game_id=game_id,
+            **request.model_dump(),
         )
     except EntityNotFoundError as error:
         raise _not_found(error) from error
-    except EntityAlreadyExistsError as error:
-        session.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
-@router.delete("/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_game(game_id: UUID, session: SessionDependency, _: AuthDependency) -> Response:
+@router.get("/{game_id}/insight", response_model=GameInsightResponse)
+def get_game_insight(
+    game_id: UUID,
+    session: SessionDependency,
+    _: AuthDependency,
+) -> GameInsightResponse:
     try:
-        GameService(session).delete_game(game_id)
+        return GameInsightsService(session).get_game_insight(game_id)
     except EntityNotFoundError as error:
         raise _not_found(error) from error
-    return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import select
@@ -17,6 +19,14 @@ class ReviewRepository:
         statement = select(Review).order_by(Review.created_at.desc())
         return list(self.session.scalars(statement))
 
+    def list_by_game_id(self, game_id: UUID) -> list[Review]:
+        statement = (
+            select(Review)
+            .where(Review.game_id == game_id)
+            .order_by(Review.created_at.desc())
+        )
+        return list(self.session.scalars(statement))
+
     def create(self, **values: object) -> Review:
         review = Review(**values)
         self.session.add(review)
@@ -24,13 +34,3 @@ class ReviewRepository:
         self.session.refresh(review)
         return review
 
-    def update(self, review: Review, values: dict[str, object]) -> Review:
-        for field, value in values.items():
-            setattr(review, field, value)
-        self.session.flush()
-        self.session.refresh(review)
-        return review
-
-    def delete(self, review: Review) -> None:
-        self.session.delete(review)
-        self.session.flush()

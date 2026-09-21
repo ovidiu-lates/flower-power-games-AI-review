@@ -33,22 +33,9 @@ class ReviewService:
             raise EntityNotFoundError("Review not found")
         return review
 
-    def list_reviews(self) -> list[Review]:
-        return self.reviews.list()
-
-    def update_review(self, review_id: UUID, values: dict[str, object]) -> Review:
-        review = self.get_review(review_id)
-        game_id = values.get("game_id")
-        if isinstance(game_id, UUID):
-            self._require_game(game_id)
-        review = self.reviews.update(review, values)
-        self.session.commit()
-        return review
-
-    def delete_review(self, review_id: UUID) -> None:
-        review = self.get_review(review_id)
-        self.reviews.delete(review)
-        self.session.commit()
+    def list_reviews_for_game(self, game_id: UUID) -> list[Review]:
+        self._require_game(game_id)
+        return self.reviews.list_by_game_id(game_id)
 
     def _require_game(self, game_id: UUID) -> None:
         if self.games.get_by_id(game_id) is None:

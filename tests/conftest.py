@@ -63,3 +63,12 @@ def authenticated_client(client: TestClient) -> Generator[tuple[TestClient, str]
     )
     assert login.status_code == 200
     yield client, login.json()["access_token"]
+
+
+@pytest.fixture
+def db_session(client: TestClient) -> Generator[Session]:
+    session = TestingSessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()

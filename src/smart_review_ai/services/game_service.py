@@ -32,18 +32,3 @@ class GameService:
     def list_games(self) -> list[Game]:
         return self.games.list()
 
-    def update_game(self, game_id: UUID, values: dict[str, object]) -> Game:
-        game = self.get_game(game_id)
-        name = values.get("name")
-        if isinstance(name, str):
-            existing = self.games.get_by_name(name)
-            if existing is not None and existing.id != game_id:
-                raise EntityAlreadyExistsError("Game name is already registered")
-        game = self.games.update(game, values)
-        self.session.commit()
-        return game
-
-    def delete_game(self, game_id: UUID) -> None:
-        game = self.get_game(game_id)
-        self.games.delete(game)
-        self.session.commit()

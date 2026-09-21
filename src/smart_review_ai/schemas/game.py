@@ -14,16 +14,6 @@ class GameCreate(BaseModel):
     max_play_time: int = Field(ge=0)
 
 
-class GameUpdate(BaseModel):
-    name: str | None = Field(default=None, min_length=1, max_length=255)
-    description: str | None = None
-    image_url: str | None = Field(default=None, max_length=2048)
-    min_players: int | None = Field(default=None, ge=1)
-    max_players: int | None = Field(default=None, ge=1)
-    min_play_time: int | None = Field(default=None, ge=0)
-    max_play_time: int | None = Field(default=None, ge=0)
-
-
 class GameResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

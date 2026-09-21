@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from smart_review_ai.models.game_insight import GameInsight
 
@@ -12,6 +12,19 @@ class GameInsightRepository:
 
     def get_by_id(self, insight_id: UUID) -> GameInsight | None:
         return self.session.get(GameInsight, insight_id)
+
+    def get_latest_by_game_id(self, game_id: UUID) -> GameInsight | None:
+        statement = (
+            select(GameInsight)
+            .options(
+                selectinload(GameInsight.liked_aspects),
+                selectinload(GameInsight.complaints),
+            )
+            .where(GameInsight.game_id == game_id)
+            .order_by(GameInsight.generated_at.desc())
+            .limit(1)
+        )
+        return self.session.scalar(statement)
 
     def list(self) -> list[GameInsight]:
         statement = select(GameInsight).order_by(GameInsight.generated_at.desc())
@@ -24,13 +37,3 @@ class GameInsightRepository:
         self.session.refresh(insight)
         return insight
 
-    def update(self, insight: GameInsight, values: dict[str, object]) -> GameInsight:
-        for field, value in values.items():
-            setattr(insight, field, value)
-        self.session.flush()
-        self.session.refresh(insight)
-        return insight
-
-    def delete(self, insight: GameInsight) -> None:
-        self.session.delete(insight)
-        self.session.flush()
