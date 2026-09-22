@@ -213,12 +213,15 @@ Download:
 
 ```text
 bgg-15m-reviews.csv
+games_detailed_info2025.csv
 ```
 
-Place the file here:
+Download both files manually from the Kaggle dataset link above and place them
+here:
 
 ```text
 data/raw/bgg-15m-reviews.csv
+data/raw/games_detailed_info2025.csv
 ```
 
 The final location should be:
@@ -227,10 +230,12 @@ The final location should be:
 smart-review-ai/
 └── data/
     └── raw/
-        └── bgg-15m-reviews.csv
+        ├── bgg-15m-reviews.csv
+        └── games_detailed_info2025.csv
 ```
 
-The raw dataset is intentionally not committed to GitHub because it is very large.
+The raw datasets are intentionally not committed to GitHub because they are
+large.
 
 ---
 
@@ -319,6 +324,29 @@ uv run alembic upgrade head
 ```
 
 This creates or updates the tables in `FlowerPowerGames`.
+
+### Import the game catalog
+
+The game import CSV must be downloaded manually from the same Kaggle dataset
+link in section 7 and saved as:
+
+```text
+data/raw/games_detailed_info2025.csv
+```
+
+After the database is running and migrations have been applied, run:
+
+```powershell
+uv run python scripts/import_games.py
+```
+
+The script imports the default CSV file, skips games that already exist, and
+prints a summary of inserted, duplicate, and invalid rows. To import a
+different CSV file, provide its path:
+
+```powershell
+uv run python scripts/import_games.py path\to\games.csv
+```
 
 ---
 
