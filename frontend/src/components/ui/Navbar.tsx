@@ -1,5 +1,6 @@
 import { useState } from "react";
-import type { User } from "../types/game";
+import { useNavigate } from "react-router-dom";
+import type { User } from "../../types/game";
 
 type NavbarProps = {
 	user: User | null;
@@ -18,17 +19,19 @@ function getInitials(user: User | null) {
 
 export default function Navbar({ user, search, onSearchChange, onSignOut }: NavbarProps) {
 	const [profileOpen, setProfileOpen] = useState(false);
+	const navigate = useNavigate();
 
 	const handleSignOut = () => {
 		setProfileOpen(false);
 		localStorage.removeItem("access_token");
 		onSignOut?.();
+		navigate("/login");
 	};
 
 	return (
 		<nav className="navbar">
 			<div className="navbar-inner">
-				<a href="/" className="navbar-logo" aria-label="Flower Power Games AI Review">
+				<a href="/discover" className="navbar-logo" aria-label="Flower Power Games AI Review">
 					<div className="navbar-logo-mark">✿</div>
 					<span>
 						Flower Power<br />
@@ -37,7 +40,7 @@ export default function Navbar({ user, search, onSearchChange, onSignOut }: Navb
 				</a>
 
 				<div className="navbar-links" aria-label="Primary navigation">
-					<a className="navbar-link active" href="/">
+					<a className="navbar-link active" href="/discover">
 						Discover
 					</a>
 					<span className="navbar-link disabled" title="No profile reviews endpoint exists yet">

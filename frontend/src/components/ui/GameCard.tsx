@@ -1,5 +1,5 @@
-import type { GameCardGame } from "../types/game";
-import { DifficultyBadge, Tag } from "../components/Badges";
+import type { GameCardGame } from "../../types/game";
+import { DifficultyBadge, Tag } from "./Badges";
 
 export default function GameCard({ game }: { game: GameCardGame }) {
 	const rating = game.rating === null ? "--" : game.rating.toFixed(1);
@@ -51,7 +51,7 @@ export default function GameCard({ game }: { game: GameCardGame }) {
 				)}
 
 				<div className="game-card-footer">
-					<span>View DB-backed insights</span>
+					<span>View insights →</span>
 				</div>
 			</div>
 		</article>

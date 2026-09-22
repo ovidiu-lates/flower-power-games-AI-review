@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { getCurrentUser } from "../api/authApi";
-import { getGameInsight, getGames } from "../api/gamesApi";
-import GameCard from "../components/GameCard";
-import Navbar from "../components/Navbar";
+import { getCurrentUser } from "../lib/authApi";
+import { getGameInsight, getGames } from "../lib/gamesApi";
+import GameCard from "../components/ui/GameCard";
+import Navbar from "../components/ui/Navbar";
 import type { Difficulty, Game, GameCardGame, GameInsight, User } from "../types/game";
 
 type SortKey = "rating" | "name";

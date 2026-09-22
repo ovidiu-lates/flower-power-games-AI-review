@@ -1,4 +1,4 @@
-import type { Difficulty, Sentiment } from "../types/game";
+import type { Difficulty, Sentiment } from "../../types/game";
 
 const sentimentConfig: Record<Sentiment, { bg: string; text: string; label: string }> = {
   positive: { bg: "#DCFCE7", text: "#15803D", label: "Positive" },
