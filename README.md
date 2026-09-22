@@ -19,6 +19,8 @@ Install the following before setting up the project:
 - Git
 - Python 3.13.15
 - `uv`
+- Node.js 20.19+ or 22.12+
+- npm
 
 You can check Git with:
 
@@ -418,6 +420,36 @@ Open the application in a browser:
 http://localhost:8000
 ```
 
+### Start the React frontend
+
+The frontend requires Node.js 20.19+ or 22.12+ and npm. After cloning the
+repository or pulling frontend changes, open a second terminal and run:
+
+```powershell
+cd frontend
+npm.cmd ci
+Copy-Item .env.example .env
+npm.cmd run dev
+```
+
+Open the frontend at:
+
+```text
+http://localhost:5173
+```
+
+The Vite development proxy forwards `/api/*` requests to the FastAPI backend
+at `http://localhost:8000`. The minimal connectivity check uses `GET /api/health`
+and expects `{"status":"ok"}`. On Windows, use `npm.cmd` if PowerShell blocks
+the `npm` command.
+
+For a production build, run these commands from `frontend/`:
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run build
+```
+
 ---
 
 ## 12. Open the API documentation
@@ -598,6 +630,7 @@ The following should be committed:
 pyproject.toml
 uv.lock
 README.md
+frontend/
 src/
 scripts/
 tests/
@@ -648,7 +681,26 @@ Start the API:
 uv run uvicorn smart_review_ai.main:app --reload --app-dir src
 ```
 
-Then open:
+In a second terminal, install and start the frontend:
+
+```powershell
+cd frontend
+npm.cmd ci
+Copy-Item .env.example .env
+npm.cmd run dev
+```
+
+Then open the frontend:
+
+```text
+http://localhost:5173
+```
+
+The frontend uses `VITE_API_BASE_URL=http://localhost:8000`. Vite proxies
+frontend requests from `/api` to the FastAPI backend, so the connectivity
+check calls `/api/health` and expects `{"status":"ok"}`.
+
+The API documentation remains available at:
 
 ```text
 http://localhost:8000/docs
