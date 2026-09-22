@@ -5,14 +5,22 @@ import GameArtwork from "../components/GameArtwork";
 import InsightsPanel from "../components/InsightsPanel";
 import ReviewCard from "../components/ReviewCard";
 import WriteReviewModal from "../components/WriteReviewModal";
-import { getGame, getGameInsight, getGameReviews } from "../services/gameService";
-import type { Game, GameInsight, PaginatedResponse, Review } from "../types/api";
+import { getGame, getGameInsight, getGameReviews } from "../lib/gamesApi";
+import type { Game, GameInsight, Review } from "../types/game";
+
+type PaginatedReviews = {
+  items: Review[];
+  page: number;
+  page_size: number;
+  total: number;
+  total_pages: number;
+};
 
 export default function GameDetailPage() {
   const { gameId = "" } = useParams();
   const [game, setGame] = useState<Game | null>(null);
   const [insight, setInsight] = useState<GameInsight | null>(null);
-  const [reviews, setReviews] = useState<PaginatedResponse<Review> | null>(null);
+  const [reviews, setReviews] = useState<PaginatedReviews | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

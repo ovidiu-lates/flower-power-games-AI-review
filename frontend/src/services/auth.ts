@@ -3,7 +3,7 @@ import {
     clearAccessToken,
     setAccessToken,
 } from '../lib/api';
-import type { User } from '../types/api';
+import type { User } from '../types/game';
 import type { AuthResponse } from '../types/auth';
 
 export const login = (username: string, password: string) =>

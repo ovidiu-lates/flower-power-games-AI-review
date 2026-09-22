@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Literal
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from smart_review_ai.models.game import Game
@@ -52,7 +52,10 @@ class GameRepository:
                 .scalar_subquery()
             )
             statement = statement.order_by(
-                latest_rating.desc().nullslast(), Game.name, Game.id
+                case((latest_rating.is_(None), 1), else_=0),
+                latest_rating.desc(),
+                Game.name,
+                Game.id,
             )
         else:
             statement = statement.order_by(Game.name, Game.id)

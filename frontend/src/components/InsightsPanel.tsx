@@ -1,7 +1,7 @@
 import { AlertCircle, BrainCircuit, Sparkles, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useState } from "react";
-import { explainGameInsight } from "../services/gameService";
-import type { GameInsight } from "../types/api";
+import { explainGameInsight } from "../lib/gamesApi";
+import type { GameInsight } from "../types/game";
 
 export default function InsightsPanel({ insight }: { insight: GameInsight }) {
   const [reviewCount, setReviewCount] = useState(Math.min(10, Math.max(1, insight.total_reviews)));

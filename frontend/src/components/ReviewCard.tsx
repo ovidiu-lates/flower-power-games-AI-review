@@ -1,5 +1,5 @@
 import { Star } from "lucide-react";
-import type { Review } from "../types/api";
+import type { Review } from "../types/game";
 
 export default function ReviewCard({ review }: { review: Review }) {
   return (

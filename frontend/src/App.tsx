@@ -1,66 +1,56 @@
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import DiscoverPage from "./pages/DiscoverPage";
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import Navbar from "./components/ui/Navbar";
+import { getCurrentUser, logout } from "./services/auth";
+import Discover from "./pages/Discover";
 import GameDetailPage from "./pages/GameDetailPage";
 import Login from "./pages/Login";
-import type { User } from "./types/api";
+import type { User } from "./types/game";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-
-        <Route element={<ProtectedLayout />}>
-          <Route path="/discover" element={<DiscoverPage />} />
+        <Route path="/discover" element={<Discover />} />
+        <Route element={<AuthenticatedLayout />}>
           <Route path="/games/:gameId" element={<GameDetailPage />} />
         </Route>
-
-        <Route
-          path="*"
-          element={
-            <Navigate
-              to={hasSession() ? "/discover" : "/login"}
-              replace
-            />
-          }
-        />
+        <Route path="*" element={<Navigate to="/discover" replace />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
-function ProtectedLayout() {
-  if (!hasSession()) {
-    return <Navigate to="/login" replace />;
-  }
+function AuthenticatedLayout() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [search, setSearch] = useState("");
 
-  const user = getStoredUser();
+  useEffect(() => {
+    void getCurrentUser()
+      .then(setUser)
+      .catch(() => {
+        logout();
+        navigate("/login", { replace: true });
+      });
+  }, [navigate]);
+
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    navigate(`/discover${value.trim() ? `?search=${encodeURIComponent(value.trim())}` : ""}`);
+  }
 
   return (
     <>
-      <Navbar user={user} />
+      <Navbar
+        user={user}
+        search={search}
+        onSearchChange={handleSearchChange}
+      />
       <Outlet />
     </>
   );
-}
-
-function hasSession() {
-  return Boolean(localStorage.getItem("access_token"));
-}
-
-function getStoredUser(): User {
-  const storedUser = localStorage.getItem("current_user");
-
-  if (!storedUser) {
-    return {} as User;
-  }
-
-  try {
-    return JSON.parse(storedUser) as User;
-  } catch {
-    return {} as User;
-  }
 }
 
 export default App;

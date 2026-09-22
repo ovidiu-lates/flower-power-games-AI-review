@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Star, X } from "lucide-react";
-import { createReview } from "../services/gameService";
+import { createReview } from "../lib/gamesApi";
 
 interface WriteReviewModalProps {
   gameId: string;
