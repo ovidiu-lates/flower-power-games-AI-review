@@ -36,3 +36,9 @@ class GameInsightResponse(BaseModel):
     generated_at: datetime
     liked_aspects: list[GameInsightLikedAspectResponse]
     complaints: list[GameInsightComplaintResponse]
+
+
+class GameInsightExplanationResponse(BaseModel):
+    game_id: UUID
+    review_count: int
+    explanation: str

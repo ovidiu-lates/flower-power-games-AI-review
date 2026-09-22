@@ -19,6 +19,7 @@ dependencies = [
     "scikit-learn>=1.9.1",
     "sqlalchemy>=2.0.54",
     "uvicorn[standard]>=0.53.0",
+    "openai>=3.17.0",
 ]
 
 [build-system]

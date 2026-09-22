@@ -1,44 +1,48 @@
 import { useEffect, useState } from "react";
-
-type ConnectionState = "checking" | "connected" | "failed";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import DiscoverPage from "./pages/DiscoverPage";
+import GameDetailPage from "./pages/GameDetailPage";
+import LoginPage from "./pages/LoginPage";
+import { getCurrentUser, logout } from "./services/authService";
+import { getAccessToken } from "./services/apiClient";
+import type { User } from "./types/api";
 
 function App() {
-  const [connectionState, setConnectionState] = useState<ConnectionState>("checking");
+  const [user, setUser] = useState<User | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(Boolean(getAccessToken()));
 
   useEffect(() => {
-    const checkBackend = async () => {
-      try {
-        const response = await fetch("/api/health");
-
-        if (!response.ok) {
-          throw new Error(`Health check failed with status ${response.status}`);
-        }
-
-        const body: unknown = await response.json();
-
-        if (
-          typeof body !== "object" ||
-          body === null ||
-          !("status" in body) ||
-          body.status !== "ok"
-        ) {
-          throw new Error("Unexpected health response");
-        }
-
-        setConnectionState("connected");
-      } catch {
-        setConnectionState("failed");
-      }
-    };
-
-    void checkBackend();
+    if (!getAccessToken()) return;
+    getCurrentUser()
+      .then(setUser)
+      .catch(() => {
+        logout();
+        setUser(null);
+      })
+      .finally(() => setCheckingAuth(false));
   }, []);
 
+  if (checkingAuth) {
+    return <div className="app-loading"><span className="loader" /><p>Opening the game shelf...</p></div>;
+  }
+
   return (
-    <main>
-      <p>Backend connection: {connectionState}</p>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/discover" replace /> : <LoginPage onLogin={setUser} />} />
+        <Route element={user ? <AppLayout user={user} /> : <Navigate to="/login" replace />}>
+          <Route path="/discover" element={<DiscoverPage />} />
+          <Route path="/games/:gameId" element={<GameDetailPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to={user ? "/discover" : "/login"} replace />} />
+      </Routes>
+    </BrowserRouter>
   );
+}
+
+function AppLayout({ user }: { user: User }) {
+  return <><Navbar user={user} /><Outlet /></>;
 }
 
 export default App;

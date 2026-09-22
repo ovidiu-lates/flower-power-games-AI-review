@@ -25,7 +25,7 @@ def test_register_login_by_username_and_me(client: TestClient) -> None:
     assert me.json()["username"] == "boardgamer"
 
 
-def test_login_does_not_use_email(client: TestClient) -> None:
+def test_login_accepts_email(client: TestClient) -> None:
     client.post(
         "/auth/register",
         json={
@@ -39,7 +39,8 @@ def test_login_does_not_use_email(client: TestClient) -> None:
         "/auth/login",
         json={"username": "boardgamer@example.com", "password": "correct horse battery staple"},
     )
-    assert response.status_code == 401
+    assert response.status_code == 200
+    assert response.json()["access_token"]
 
 
 def test_oauth2_token_endpoint_accepts_form_data(client: TestClient) -> None:

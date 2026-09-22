@@ -3,11 +3,14 @@ from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from smart_review_ai.analysis.review_analyzer import ReviewAnalysisResult
 from smart_review_ai.models.game_insight import GameInsight
 from smart_review_ai.models.game_insight_complaint import GameInsightComplaint
 from smart_review_ai.models.game_insight_liked_aspect import GameInsightLikedAspect
+from smart_review_ai.models.review import Review
 
 
 def auth_headers(token: str) -> dict[str, str]:
@@ -361,10 +364,40 @@ def test_list_games_rejects_invalid_filters(
 
 def test_game_scoped_review_creation_and_listing(
     authenticated_client: tuple[TestClient, str],
+    db_session: Session,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    class FakeAnalyzer:
+        def analyze(self, *, content: str, rating: int) -> ReviewAnalysisResult:
+            return ReviewAnalysisResult(
+                sentiment="positive",
+                confidence=0.92,
+                perceived_difficulty="medium",
+                liked_aspects=["strategy"],
+                complaints=["downtime"],
+            )
+
+    monkeypatch.setattr(
+        "smart_review_ai.services.review_service.get_default_review_analyzer",
+        lambda: FakeAnalyzer(),
+    )
     client, token = authenticated_client
     headers = auth_headers(token)
     game = create_game(client, token)
+    original_insight = GameInsight(
+        game_id=UUID(game["id"]),
+        total_reviews=10,
+        average_rating=4.0,
+        positive_percentage=20,
+        neutral_percentage=30,
+        negative_percentage=50,
+        easy_percentage=10,
+        medium_percentage=20,
+        hard_percentage=70,
+    )
+    db_session.add(original_insight)
+    db_session.commit()
+    original_insight_id = original_insight.id
 
     created = client.post(
         f"/games/{game['id']}/reviews",
@@ -375,6 +408,28 @@ def test_game_scoped_review_creation_and_listing(
     review = created.json()
     assert review["game_id"] == game["id"]
     assert review["user_id"]
+    persisted_review = db_session.scalar(
+        select(Review).where(Review.id == UUID(review["id"]))
+    )
+    assert persisted_review is not None
+    assert persisted_review.analysis is not None
+    assert persisted_review.analysis.sentiment == "positive"
+    assert [item.aspect for item in persisted_review.analysis.liked_aspects] == [
+        "strategy"
+    ]
+    assert [item.complaint for item in persisted_review.analysis.complaints] == [
+        "downtime"
+    ]
+    db_session.expire_all()
+    updated_insight = db_session.get(GameInsight, original_insight_id)
+    assert updated_insight is not None
+    assert updated_insight.id == original_insight_id
+    assert updated_insight.total_reviews == 1
+    assert updated_insight.average_rating == 8
+    assert updated_insight.positive_percentage == 100
+    assert updated_insight.medium_percentage == 100
+    assert updated_insight.liked_aspects[0].aspect == "strategy"
+    assert updated_insight.liked_aspects[0].occurrence_count == 1
 
     listed = client.get(f"/games/{game['id']}/reviews", headers=headers)
     assert listed.status_code == 200

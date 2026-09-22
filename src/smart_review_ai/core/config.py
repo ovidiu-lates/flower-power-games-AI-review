@@ -9,6 +9,8 @@ load_dotenv()
 @dataclass(frozen=True)
 class Settings:
     database_url: str | None = os.getenv("DATABASE_URL")
+    openai_api_key: str | None = os.getenv("OPENAI_API_KEY")
+    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
     jwt_secret_key: str = os.getenv(
         "JWT_SECRET_KEY", "development-only-secret-key-32-bytes-long"
     )
