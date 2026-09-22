@@ -1,5 +1,5 @@
 import type { Game, GameInsight, PaginatedResponse, Review } from "../types/api";
-import { apiRequest } from "./apiClient";
+import { apiRequest } from "../lib/api";
 
 export function listGames(search = "") {
   const query = new URLSearchParams({ page: "1", page_size: "24" });

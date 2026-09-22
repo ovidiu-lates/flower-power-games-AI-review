@@ -30,7 +30,7 @@ class AuthService:
         return user
 
     def authenticate(self, *, username: str, password: str) -> str:
-        user = self.users.get_by_username(username)
+        user = self.users.get_by_username(username) or self.users.get_by_email(username)
         if user is None or not verify_password(password, user.password_hash):
             raise InvalidCredentialsError("Invalid username or password")
         return create_access_token(user.id)

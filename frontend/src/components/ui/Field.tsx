@@ -5,6 +5,7 @@ interface FieldProps {
     value: string;
     onChange: (value: string) => void;
     autoComplete?: string;
+    minLength?: number;
 }
 
 export default function Field({
@@ -14,6 +15,7 @@ export default function Field({
     value,
     onChange,
     autoComplete,
+    minLength,
 }: FieldProps) {
     return (
         <div className= "login-field" >
@@ -25,6 +27,7 @@ export default function Field({
     placeholder = { placeholder }
     value = { value }
     autoComplete = { autoComplete }
+    minLength = { minLength }
     onChange = {(event) => onChange(event.target.value)
 }
       />

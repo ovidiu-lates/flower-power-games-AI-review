@@ -198,6 +198,7 @@
     background: #dcfce7;
     color: #166534;
     font-size: 14px;
+}
 
 :root { font-family: "Outfit", sans-serif; color: #1c1917; background: #f7f5f0; font-synthesis: none; --ink: #1c1917; --muted: #57534e; --paper: #ffffff; --canvas: #f7f5f0; --line: #e7e5e0; --orange: #c85a1e; --orange-dark: #a8461a; --green: #16a34a; }
 * { box-sizing: border-box; }

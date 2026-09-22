@@ -1,7 +1,7 @@
 import { Flower2, LogOut, Search, UserRound } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { logout } from "../services/authService";
+import { logout } from "../services/auth";
 import type { User } from "../types/api";
 
 export default function Navbar({ user }: { user: User }) {
