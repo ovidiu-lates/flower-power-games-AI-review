@@ -29,6 +29,7 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+node_modules/
 
 # Local model/cache files
 .cache/
