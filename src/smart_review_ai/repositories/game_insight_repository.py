@@ -36,4 +36,3 @@ class GameInsightRepository:
         self.session.flush()
         self.session.refresh(insight)
         return insight
-

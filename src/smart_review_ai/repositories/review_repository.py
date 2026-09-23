@@ -33,4 +33,3 @@ class ReviewRepository:
         self.session.flush()
         self.session.refresh(review)
         return review
-

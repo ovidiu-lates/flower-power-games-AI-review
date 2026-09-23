@@ -1,5 +1,7 @@
 import type { GameCardGame } from "../../types/game";
 import { DifficultyBadge, Tag } from "./Badges";
+import { Link } from "react-router-dom";
+import GameArtwork from "../GameArtwork";
 
 export default function GameCard({ game }: { game: GameCardGame }) {
 	const rating = game.rating === null ? "--" : game.rating.toFixed(1);
@@ -7,16 +9,16 @@ export default function GameCard({ game }: { game: GameCardGame }) {
 	const positivePct = game.positivePct === null ? null : Math.round(game.positivePct);
 
 	return (
-		<article className="game-card">
+		<Link to={`/games/${game.id}`} className="game-card">
 			<div className="game-card-cover">
-				<img src={game.coverImage} alt={game.title} />
+				<GameArtwork src={game.coverImage} name={game.title} />
 				<div className="game-card-difficulty">
 					<DifficultyBadge difficulty={game.difficulty} />
 				</div>
 				<div className="game-card-cover-gradient" />
 				<div className="game-card-rating">
 					<span>{rating}</span>
-					<small>/ 5</small>
+					<small>/ 10</small>
 				</div>
 			</div>
 
@@ -54,6 +56,6 @@ export default function GameCard({ game }: { game: GameCardGame }) {
 					<span>View insights →</span>
 				</div>
 			</div>
-		</article>
+		</Link>
 	);
 }

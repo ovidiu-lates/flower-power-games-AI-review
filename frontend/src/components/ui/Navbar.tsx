@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { logout } from "../../services/auth";
 import type { User } from "../../types/game";
 
 type NavbarProps = {
@@ -23,7 +24,7 @@ export default function Navbar({ user, search, onSearchChange, onSignOut }: Navb
 
 	const handleSignOut = () => {
 		setProfileOpen(false);
-		localStorage.removeItem("access_token");
+		logout();
 		onSignOut?.();
 		navigate("/login");
 	};

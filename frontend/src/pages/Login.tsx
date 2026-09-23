@@ -2,7 +2,13 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Field from '../components/ui/Field';
 import { ApiError } from '../lib/api';
-import { login, register, saveSession } from '../services/auth';
+import {
+    getCurrentUser,
+    login,
+    register,
+    saveCurrentUser,
+    saveSession,
+} from '../services/auth';
 import type { AuthMode } from '../types/auth';
 
 export default function Login() {
@@ -63,6 +69,7 @@ export default function Login() {
                 );
 
                 saveSession(response);
+                saveCurrentUser(await getCurrentUser());
                 navigate('/discover');
             } else {
                 await register(
@@ -98,7 +105,7 @@ export default function Login() {
         <div className= "login-page" >
         <div className="login-container" >
             <header className="login-brand" >
-                <div className="login-brand-icon" >* </div>
+                <div className="login-brand-icon" aria-hidden="true">✿</div>
 
                     < div >
                     <p className="login-brand-name" >

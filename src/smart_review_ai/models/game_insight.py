@@ -8,6 +8,8 @@ from sqlalchemy import DateTime, Float, ForeignKey, Integer, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from smart_review_ai.db.database import Base
+from smart_review_ai.models.game_insight_complaint import GameInsightComplaint
+from smart_review_ai.models.game_insight_liked_aspect import GameInsightLikedAspect
 
 if TYPE_CHECKING:
     from smart_review_ai.models.game import Game
@@ -38,8 +40,18 @@ class GameInsight(Base):
 
     game: Mapped[Game] = relationship(back_populates="insights")
     liked_aspects: Mapped[list[GameInsightLikedAspect]] = relationship(
-        back_populates="game_insight", cascade="all, delete-orphan"
+        back_populates="game_insight",
+        cascade="all, delete-orphan",
+        order_by=lambda: (
+            GameInsightLikedAspect.occurrence_count.desc(),
+            GameInsightLikedAspect.aspect.asc(),
+        ),
     )
     complaints: Mapped[list[GameInsightComplaint]] = relationship(
-        back_populates="game_insight", cascade="all, delete-orphan"
+        back_populates="game_insight",
+        cascade="all, delete-orphan",
+        order_by=lambda: (
+            GameInsightComplaint.occurrence_count.desc(),
+            GameInsightComplaint.complaint.asc(),
+        ),
     )

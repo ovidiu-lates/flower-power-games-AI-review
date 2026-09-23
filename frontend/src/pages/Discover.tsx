@@ -193,7 +193,6 @@ export default function Discover() {
   return (
     <div className="discover-page">
       <Navbar user={user} search={search} onSearchChange={setSearch} onSignOut={handleSignOut} />
-
       <section className="discover-hero">
         <div className="page-shell">
           <div className="hero-copy">
