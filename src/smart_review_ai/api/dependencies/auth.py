@@ -10,7 +10,7 @@ from smart_review_ai.core.security import decode_access_token
 from smart_review_ai.models.user import User
 from smart_review_ai.repositories.user_repository import UserRepository
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 
 def get_current_user(

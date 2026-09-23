@@ -52,6 +52,11 @@ export type Review = {
   updated_at: string;
 };
 
+export type UserReview = Review & {
+  game_name: string;
+  game_image_url: string;
+};
+
 export type User = {
   id: string;
   username: string;

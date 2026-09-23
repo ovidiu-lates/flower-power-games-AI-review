@@ -4,6 +4,7 @@ import type {
   GameInsight,
   PaginatedGamesResponse,
   Review,
+  UserReview,
 } from "../types/game";
 import { apiRequest, ApiError } from "./api";
 
@@ -78,6 +79,10 @@ export async function getGameReviews(gameId: string, page = 1, pageSize = 5) {
     total: response.length,
     total_pages: Math.max(1, Math.ceil(response.length / pageSize)),
   };
+}
+
+export function getMyReviews() {
+  return apiRequest<UserReview[]>("/reviews/mine");
 }
 
 export function explainGameInsight(gameId: string, reviewCount: number) {
