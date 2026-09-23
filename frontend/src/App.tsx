@@ -12,14 +12,55 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/discover" element={<Discover />} />
+        <Route element={<RequireAuthentication />}>
+          <Route path="/discover" element={<Discover />} />
+        </Route>
         <Route element={<AuthenticatedLayout />}>
           <Route path="/games/:gameId" element={<GameDetailPage />} />
         </Route>
-        <Route path="*" element={<Navigate to="/discover" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
+}
+
+function RequireAuthentication() {
+  const navigate = useNavigate();
+  const [checking, setChecking] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    void getCurrentUser()
+      .then(() => {
+        if (active) {
+          setAuthenticated(true);
+        }
+      })
+      .catch(() => {
+        logout();
+        if (active) {
+          setAuthenticated(false);
+          navigate("/login", { replace: true });
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setChecking(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
+
+  if (checking) {
+    return <main className="page-shell state-message"><span className="loader" /> Checking your session...</main>;
+  }
+
+  return authenticated ? <Outlet /> : null;
 }
 
 function AuthenticatedLayout() {
