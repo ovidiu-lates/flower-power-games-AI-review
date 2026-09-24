@@ -1,13 +1,27 @@
-import { Star } from "lucide-react";
+import { Star, UserRound } from "lucide-react";
+import { Link } from "react-router-dom";
+import GameArtwork from "./GameArtwork";
 import type { Review } from "../types/game";
 
-export default function ReviewCard({ review }: { review: Review }) {
+type ReviewCardProps = {
+  review: Review;
+  gameName?: string;
+  gameImageUrl?: string;
+};
+
+export default function ReviewCard({ review, gameName, gameImageUrl }: ReviewCardProps) {
   return (
     <article className="review-card">
       <div className="review-card__meta">
-        <span className="review-card__avatar">{review.user_id.slice(0, 2).toUpperCase()}</span>
+        {gameImageUrl ? (
+          <span className="review-card__avatar review-card__game-artwork">
+            <GameArtwork src={gameImageUrl} name={gameName ?? "Game"} />
+          </span>
+        ) : (
+          <span className="review-card__avatar" aria-hidden="true"><UserRound size={17} /></span>
+        )}
         <div>
-          <strong>Player review</strong>
+          <strong>{gameName ? <Link to={`/games/${review.game_id}`}>{gameName}</Link> : "Player review"}</strong>
           <time dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString()}</time>
         </div>
         <span className="rating"><Star size={15} fill="currentColor" /> {review.rating}/10</span>

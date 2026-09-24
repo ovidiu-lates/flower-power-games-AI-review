@@ -49,7 +49,7 @@ def client() -> Generator[TestClient]:
 @pytest.fixture
 def authenticated_client(client: TestClient) -> Generator[tuple[TestClient, str]]:
     response = client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "username": "boardgamer",
             "email": "boardgamer@example.com",
@@ -58,7 +58,7 @@ def authenticated_client(client: TestClient) -> Generator[tuple[TestClient, str]
     )
     assert response.status_code == 201
     login = client.post(
-        "/auth/login",
+        "/api/auth/login",
         json={"username": "boardgamer", "password": "correct horse battery staple"},
     )
     assert login.status_code == 200

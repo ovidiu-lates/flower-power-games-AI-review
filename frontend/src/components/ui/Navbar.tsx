@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../services/auth";
 import type { User } from "../../types/game";
 
@@ -41,12 +41,12 @@ export default function Navbar({ user, search, onSearchChange, onSignOut }: Navb
 				</a>
 
 				<div className="navbar-links" aria-label="Primary navigation">
-					<a className="navbar-link active" href="/discover">
+					<NavLink className={({ isActive }) => `navbar-link${isActive ? " active" : ""}`} to="/discover">
 						Discover
-					</a>
-					<span className="navbar-link disabled" title="No profile reviews endpoint exists yet">
+					</NavLink>
+					<NavLink className={({ isActive }) => `navbar-link${isActive ? " active" : ""}`} to="/my-reviews">
 						My Reviews
-					</span>
+					</NavLink>
 				</div>
 
 				<div className="navbar-search">

@@ -5,6 +5,7 @@ import { getCurrentUser, logout } from "./services/auth";
 import Discover from "./pages/Discover";
 import GameDetailPage from "./pages/GameDetailPage";
 import Login from "./pages/Login";
+import MyReviews from "./pages/MyReviews";
 import type { User } from "./types/game";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         </Route>
         <Route element={<AuthenticatedLayout />}>
           <Route path="/games/:gameId" element={<GameDetailPage />} />
+          <Route path="/my-reviews" element={<MyReviews />} />
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

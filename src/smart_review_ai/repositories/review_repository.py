@@ -27,6 +27,14 @@ class ReviewRepository:
         )
         return list(self.session.scalars(statement))
 
+    def list_by_user_id(self, user_id: UUID) -> list[Review]:
+        statement = (
+            select(Review)
+            .where(Review.user_id == user_id)
+            .order_by(Review.created_at.desc())
+        )
+        return list(self.session.scalars(statement))
+
     def create(self, **values: object) -> Review:
         review = Review(**values)
         self.session.add(review)

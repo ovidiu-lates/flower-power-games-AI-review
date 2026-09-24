@@ -51,6 +51,9 @@ class ReviewService:
         self._require_game(game_id)
         return self.reviews.list_by_game_id(game_id)
 
+    def list_reviews_for_user(self, user_id: UUID) -> list[Review]:
+        return self.reviews.list_by_user_id(user_id)
+
     def _require_game(self, game_id: UUID) -> None:
         if self.games.get_by_id(game_id) is None:
             raise EntityNotFoundError("Game not found")

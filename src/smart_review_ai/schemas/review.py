@@ -19,3 +19,8 @@ class ReviewResponse(BaseModel):
     content: str
     created_at: datetime
     updated_at: datetime
+
+
+class UserReviewResponse(ReviewResponse):
+    game_name: str
+    game_image_url: str
