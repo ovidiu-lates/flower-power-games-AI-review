@@ -31,6 +31,8 @@ difficulty, and sort the results by rating or name.
 
 <img width="1801" height="907" alt="image" src="https://github.com/user-attachments/assets/85fc2e76-59c6-42f1-aeae-d637a14f1bb4" />
 
+<img width="1581" height="904" alt="image" src="https://github.com/user-attachments/assets/53b995dd-bbfd-4125-9a7f-9485848eff93" />
+
 
 ### Game details and insights
 
