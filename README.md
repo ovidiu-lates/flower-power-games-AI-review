@@ -18,12 +18,18 @@ The application contains the following main screens:
 Users can log in or create an account. Registration validates the password and
 the login form stores the returned access token for authenticated API requests.
 
+<img width="1874" height="901" alt="image" src="https://github.com/user-attachments/assets/d0fa3e7e-8f34-4cf2-ba70-4ad46c4bf5bd" />
+
+<img width="1621" height="906" alt="image" src="https://github.com/user-attachments/assets/d1cce971-443c-47e9-b2c8-40506dcbf1b4" />
+
 
 ### Discover games
 
 The Discover page presents the game catalogue and its latest review insights.
 Users can search by name, filter by player count, maximum play time, and
 difficulty, and sort the results by rating or name.
+
+<img width="1801" height="907" alt="image" src="https://github.com/user-attachments/assets/85fc2e76-59c6-42f1-aeae-d637a14f1bb4" />
 
 
 ### Game details and insights
@@ -32,6 +38,10 @@ Selecting a game opens its details page. The page shows game facts, the
 community rating, the number of analyzed reviews, AI-generated insight panels,
 and paginated player reviews.
 
+<img width="1822" height="901" alt="image" src="https://github.com/user-attachments/assets/4686c435-37ee-458f-9da6-184c36cf5410" />
+
+<img width="1630" height="913" alt="image" src="https://github.com/user-attachments/assets/45125e6d-95c0-4add-b02c-9cc282f72b27" />
+
 
 ### Write a review
 
@@ -39,11 +49,15 @@ The **Write a review** and **Add yours** buttons open a modal where an
 authenticated user can choose a rating from 1 to 10, write a review, and
 publish it.
 
+<img width="1624" height="902" alt="image" src="https://github.com/user-attachments/assets/6a96b205-fa40-4bff-a157-d39606ea1786" />
+
 
 ### My reviews
 
 The **My Reviews** navigation item shows the reviews published by the signed-in
 user.
+
+<img width="1673" height="911" alt="image" src="https://github.com/user-attachments/assets/f93256f7-2c16-4a91-85cf-ba951b94a4ce" />
 
 
 ---
