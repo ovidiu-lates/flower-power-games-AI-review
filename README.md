@@ -1,18 +1,139 @@
-# Smart Review AI
+# Flower Power Games - AI Review
 
-Smart Review AI analyzes BoardGameGeek review text and transforms unstructured reviews into structured game insights such as:
+Flower Power Games - AI Review helps people choose board games using insights
+extracted from real player reviews. The application turns unstructured review
+text into useful signals such as sentiment, perceived difficulty, liked
+aspects, common complaints, average rating, and review counts.
 
-- Sentiment
-- Perceived difficulty
-- Common themes/aspects
-- Common complaints
-- Aggregated insights per game
+The project is built as a React frontend backed by a FastAPI REST API. It is
+currently designed to run locally and can later be integrated into the wider
+Flower Power Games application.
 
-The project is designed to run independently first and later be integrated with the Flower Power application through a small REST API.
+## Application preview
+
+The application contains the following main screens:
+
+### Login and account creation
+
+Users can log in or create an account. Registration validates the password and
+the login form stores the returned access token for authenticated API requests.
+
+
+### Discover games
+
+The Discover page presents the game catalogue and its latest review insights.
+Users can search by name, filter by player count, maximum play time, and
+difficulty, and sort the results by rating or name.
+
+
+### Game details and insights
+
+Selecting a game opens its details page. The page shows game facts, the
+community rating, the number of analyzed reviews, AI-generated insight panels,
+and paginated player reviews.
+
+
+### Write a review
+
+The **Write a review** and **Add yours** buttons open a modal where an
+authenticated user can choose a rating from 1 to 10, write a review, and
+publish it.
+
+
+### My reviews
+
+The **My Reviews** navigation item shows the reviews published by the signed-in
+user.
+
 
 ---
 
-## 1. Requirements
+## What users can do
+
+- Create an account and sign in securely.
+- Browse the available board-game catalogue.
+- Search games by name from the navigation bar.
+- Filter games by number of players, play time, and perceived difficulty.
+- Sort games by community rating or name.
+- Open a game to view its description, player limits, play time, rating, and
+  review count.
+- Read AI-generated insights about sentiment, difficulty, liked aspects, and
+  common complaints.
+- Read community reviews with pagination.
+- Write and publish a personal review with a 1-10 rating.
+- Review previously published feedback from the **My Reviews** page.
+- Sign out from the profile menu.
+
+## How the application works
+
+1. A user signs in or creates an account from the frontend.
+2. The React application sends authenticated requests to the FastAPI API.
+3. Games and reviews are stored in SQL Server through SQLAlchemy.
+4. Review analysis transforms text into structured sentiment, difficulty,
+   themes, and complaint data.
+5. Game-level insights aggregate the analyzed reviews and are displayed on the
+   Discover and Game Details pages.
+6. A new review refreshes the game's review list and available insights.
+
+The frontend does not contain the analysis logic. It calls the API and renders
+the responses, keeping the presentation and backend responsibilities separate.
+
+## Technology stack
+
+### Backend
+
+- Python 3.13.15
+- FastAPI and Uvicorn
+- SQLAlchemy and Alembic
+- Microsoft SQL Server (Docker)
+- pandas for dataset preparation and import
+- scikit-learn and OpenAI integrations for review analysis
+- JWT authentication with Argon2 password hashing
+
+### Frontend
+
+- React 19
+- TypeScript
+- Vite
+- React Router
+- lucide-react icons
+
+## Project structure
+
+Only the most important areas are shown below:
+
+```text
+flower-power-games-AI-review/
+├── src/smart_review_ai/
+│   ├── main.py                 # FastAPI app, CORS, and API registration
+│   ├── api/                    # Authentication, games, reviews, and health routes
+│   ├── analysis/               # Review analysis and insight generation
+│   ├── services/               # Application/business logic
+│   ├── repositories/           # Database access
+│   ├── models/                 # SQLAlchemy database models
+│   ├── schemas/                # Request and response schemas
+│   ├── core/                   # Configuration, security, and exceptions
+│   └── db/                     # Database engine and session setup
+├── frontend/
+│   ├── src/pages/              # Login, Discover, Game Details, My Reviews
+│   ├── src/components/         # Cards, insights, navigation, and review modal
+│   ├── src/lib/                # API clients
+│   ├── src/services/           # Authentication/session helpers
+│   └── package.json
+├── data/
+│   ├── raw/                    # Downloaded Kaggle CSV files
+│   └── processed/              # Prepared reviews
+├── scripts/
+│   ├── prepare_reviews.py      # Removes rows without review text
+│   └── import_games.py         # Imports game data into SQL Server
+├── migrations/                 # Alembic migration history
+├── compose.yml                 # Local SQL Server container
+├── pyproject.toml              # Python dependencies and project metadata
+├── uv.lock                     # Locked Python dependency versions
+└── README.md
+```
+
+## Requirements
 
 Install the following before setting up the project:
 
@@ -21,715 +142,226 @@ Install the following before setting up the project:
 - `uv`
 - Node.js 20.19+ or 22.12+
 - npm
+- Docker Desktop (for SQL Server)
 
-You can check Git with:
+Check the installed tools:
 
-```bash
+```powershell
 git --version
-```
-
-You can check Python with:
-
-```bash
 python --version
-```
-
-The expected Python version is:
-
-```text
-Python 3.13.15
-```
-
-You can check whether `uv` is installed with:
-
-```bash
 uv --version
+node --version
+npm.cmd --version
+docker --version
 ```
 
----
+## Installation and local setup
 
-## 2. Install `uv`
+The commands below are written for Windows PowerShell. `npm.cmd` is used
+explicitly because it works on Windows systems where the PowerShell execution
+policy prevents the `npm` shim from running.
 
-If `uv` is already installed, skip this step.
-
-### Windows PowerShell
+### 1. Clone the repository
 
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-Close and reopen PowerShell, then verify:
-
-```powershell
-uv --version
-```
-
----
-
-## 3. Clone the repository
-
-Clone the GitHub repository:
-
-```bash
 git clone <REPOSITORY_URL>
+cd flower-power-games-AI-review
 ```
 
-Move into the project directory:
+### 2. Install Python and synchronize the environment
 
-```bash
-cd smart-review-ai
-```
-
-Replace `<REPOSITORY_URL>` with the actual GitHub repository URL.
-
----
-
-## 4. Install the required Python version
-
-The project uses:
-
-```text
-Python 3.13.15
-```
-
-The required version is also stored in:
-
-```text
-.python-version
-```
-
-To make sure the correct Python version is available, run:
-
-```bash
+```powershell
 uv python install 3.13.15
-```
-
-Verify it with:
-
-```bash
-uv run python --version
-```
-
-Expected output:
-
-```text
-Python 3.13.15
-```
-
----
-
-## 5. Create and synchronize the virtual environment
-
-Run:
-
-```bash
 uv sync
 ```
 
-This command:
+`uv sync` creates `.venv` and installs the versions recorded in `uv.lock`.
+There is no need to activate the virtual environment when using `uv run`.
 
-1. Creates `.venv` if it does not already exist.
-2. Installs the dependencies from `pyproject.toml`.
-3. Uses the exact dependency versions stored in `uv.lock`.
+### 3. Configure environment variables
 
-You do **not** need to commit `.venv` to GitHub.
+Copy the backend template:
 
-You also do not need to manually activate the environment when using commands through `uv run`.
-
-For example:
-
-```bash
-uv run python --version
+```powershell
+Copy-Item .env.example .env
 ```
 
-runs Python inside the project environment automatically.
+Update `.env` with a strong SQL Server password and your OpenAI settings. The password in `DATABASE_URL` must be URL-encoded (`!` becomes `%21`, for example).
+Never commit `.env` or API keys.
 
----
+The frontend already has a template as well:
 
-## 6. Project structure
+```powershell
+Copy-Item frontend\.env.example frontend\.env
+```
 
-The project is organized approximately like this:
+The default value is:
 
 ```text
-smart-review-ai/
-│
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── sample/
-│
-├── scripts/
-│   └── prepare_reviews.py
-│
-├── src/
-│   └── smart_review_ai/
-│       ├── __init__.py
-│       ├── main.py
-│       │
-│       ├── api/
-│       │   ├── __init__.py
-│       │   └── routes.py
-│       │
-│       ├── analysis/
-│       │   ├── __init__.py
-│       │   ├── sentiment.py
-│       │   ├── difficulty.py
-│       │   ├── themes.py
-│       │   └── complaints.py
-│       │
-│       ├── aggregation/
-│       │   ├── __init__.py
-│       │   └── aggregator.py
-│       │
-│       ├── models/
-│       │   ├── __init__.py
-│       │   ├── review.py
-│       │   ├── review_analysis.py
-│       │   └── game_insights.py
-│       │
-│       └── services/
-│           ├── __init__.py
-│           └── review_service.py
-│
-├── tests/
-│
-├── .env.example
-├── .gitignore
-├── .python-version
-├── pyproject.toml
-├── uv.lock
-└── README.md
+VITE_API_BASE_URL=http://localhost:8000
 ```
 
----
+### 4. Download the source datasets
 
-## 7. Download the BoardGameGeek dataset
-
-The project uses the BoardGameGeek Reviews dataset from Kaggle:
-
-```text
-https://www.kaggle.com/datasets/jvanelteren/boardgamegeek-reviews
-```
-
-Download:
-
-```text
-bgg-15m-reviews.csv
-games_detailed_info2025.csv
-```
-
-Download both files manually from the Kaggle dataset link above and place them
-here:
+Download the BoardGameGeek Reviews dataset from
+[Kaggle](https://www.kaggle.com/datasets/jvanelteren/boardgamegeek-reviews).
+Place these files in `data/raw/`:
 
 ```text
 data/raw/bgg-15m-reviews.csv
 data/raw/games_detailed_info2025.csv
 ```
 
-The final location should be:
+The raw files are large and are intentionally not committed to the repository.
 
-```text
-smart-review-ai/
-└── data/
-    └── raw/
-        ├── bgg-15m-reviews.csv
-        └── games_detailed_info2025.csv
-```
+### 5. Prepare the review data
 
-The raw datasets are intentionally not committed to GitHub because they are
-large.
-
----
-
-## 8. Prepare the review dataset
-
-The raw BoardGameGeek dataset contains rows without written review comments.
-
-The preprocessing script filters the dataset and keeps only rows where `comment` contains text.
-
-Run:
-
-```bash
-uv run python scripts/prepare_reviews.py
-```
-
-The script reads:
-
-```text
-data/raw/bgg-15m-reviews.csv
-```
-
-and generates the processed file in:
-
-```text
-data/processed/
-```
-
-For example:
-
-```text
-data/processed/reviews_with_comments.csv
-```
-
-The preprocessing script should not modify the original raw dataset.
-
-The intended data flow is:
-
-```text
-Kaggle dataset
-      ↓
-data/raw/bgg-15m-reviews.csv
-      ↓
-scripts/prepare_reviews.py
-      ↓
-data/processed/reviews_with_comments.csv
-      ↓
-Smart Review AI analysis pipeline
-```
-
----
-
-## 9. Configure and start the database
-
-Copy the environment template:
+The preparation script keeps rows containing written review comments and
+normalizes their text:
 
 ```powershell
-Copy-Item .env.example .env
+uv run python scripts\prepare_reviews.py
 ```
 
-Update `.env` with the SQL Server password you want to use. The password in
-`DATABASE_URL` must be URL-encoded. For example, `!` becomes `%21`.
+It creates:
 
-Start SQL Server with Docker:
+```text
+data/processed/reviews_with_comments.csv
+```
+
+### 6. Start SQL Server and create the database
+
+Start the local SQL Server container:
 
 ```powershell
 docker compose up -d
 ```
 
-The container listens on `localhost:1434`. The first time you set up the
-project, create the `FlowerPowerGames` database on that same SQL Server
-instance. You can do this in SSMS by connecting to `localhost,1434` as `sa`
-and running:
+The container is available at `localhost,1434`. Create a database named
+`FlowerPowerGames` by connecting as `sa` from SQL Server Management Studio (or
+another SQL client) and running:
 
 ```sql
 CREATE DATABASE FlowerPowerGames;
 ```
 
-Make sure SSMS uses the same host, port, username, and password as `.env`.
-Connecting to another local SQL Server instance will not make the database
-available to this project.
-
-Apply all migrations that are already committed to the repository:
+Apply the migrations:
 
 ```powershell
 uv run alembic upgrade head
 ```
 
-This creates or updates the tables in `FlowerPowerGames`.
-
-### Import the game catalog
-
-The game import CSV must be downloaded manually from the same Kaggle dataset
-link in section 7 and saved as:
-
-```text
-data/raw/games_detailed_info2025.csv
-```
-
-After the database is running and migrations have been applied, run:
+Import the game catalogue:
 
 ```powershell
-uv run python scripts/import_games.py
+uv run python scripts\import_games.py
 ```
 
-The script imports the default CSV file, skips games that already exist, and
-prints a summary of inserted, duplicate, and invalid rows. To import a
-different CSV file, provide its path:
+To import another CSV file:
 
 ```powershell
-uv run python scripts/import_games.py path\to\games.csv
+uv run python scripts\import_games.py path\to\games.csv
 ```
 
----
+### 7. Install and start the backend
 
-## 10. Work with migrations
-
-Run this sequence whenever you start working on the project:
+From the repository root:
 
 ```powershell
-docker compose up -d
-uv sync
-uv run alembic upgrade head
+uv run uvicorn smart_review_ai.main:app --reload
 ```
 
-When you change a SQLAlchemy model, generate a migration from the model
-metadata:
+The API is available at `http://localhost:8000`. Useful checks include:
 
-```powershell
-uv run alembic revision --autogenerate -m "describe the schema change"
-```
+- OpenAPI documentation: `http://localhost:8000/docs`
+- Health endpoint: `http://localhost:8000/api/health`
 
-Review the generated file in `migrations/versions/`. Autogeneration should be
-checked manually, especially for renamed or removed columns. Then apply it:
+### 8. Install and start the frontend
 
-```powershell
-uv run alembic upgrade head
-```
-
-Commit the migration file with the model changes. Other developers should
-pull the migration and run `uv run alembic upgrade head`; they should not
-regenerate the same migration.
-
-Useful migration commands:
-
-```powershell
-# Show the current database revision
-uv run alembic current
-
-# Show the migration history
-uv run alembic history
-
-# Roll back one migration locally
-uv run alembic downgrade -1
-```
-
-Do not delete or edit an already-applied migration to correct a later change.
-Create a new migration instead. If the database is disposable and you need a
-clean local database, use `docker compose down -v`, start the container again,
-recreate `FlowerPowerGames`, and run `uv run alembic upgrade head`.
-
----
-
-## 11. Start the FastAPI application
-
-Run:
-
-```bash
-uv run uvicorn smart_review_ai.main:app --reload --app-dir src
-```
-
-You should see output similar to:
-
-```text
-Uvicorn running on http://127.0.0.1:8000
-```
-
-Open the application in a browser:
-
-```text
-http://localhost:8000
-```
-
-### Start the React frontend
-
-The frontend requires Node.js 20.19+ or 22.12+ and npm. After cloning the
-repository or pulling frontend changes, open a second terminal and run:
+Open a second PowerShell window:
 
 ```powershell
 cd frontend
-npm.cmd ci
-Copy-Item .env.example .env
+npm.cmd install
 npm.cmd run dev
 ```
 
-Open the frontend at:
+The frontend is available at `http://localhost:5173`. Keep both the backend and
+frontend terminals running while using the application.
 
-```text
-http://localhost:5173
-```
+## API overview
 
-The Vite development proxy forwards `/api/*` requests to the FastAPI backend
-at `http://localhost:8000`. The minimal connectivity check uses `GET /api/health`
-and expects `{"status":"ok"}`. On Windows, use `npm.cmd` if PowerShell blocks
-the `npm` command.
+The backend mounts its routes under `/api`:
 
-For a production build, run these commands from `frontend/`:
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/health` | Check that the API is running |
+| `POST` | `/api/auth/register` | Create a user account |
+| `POST` | `/api/auth/login` | Log in and receive an access token |
+| `GET` | `/api/auth/me` | Get the current authenticated user |
+| `GET` | `/api/games` | Search, filter, sort, and paginate games |
+| `GET` | `/api/games/{game_id}` | Get one game's details |
+| `GET` | `/api/games/{game_id}/insight` | Get aggregated game insights |
+| `GET` | `/api/games/{game_id}/reviews` | List reviews for a game |
+| `POST` | `/api/games/{game_id}/reviews` | Publish a review |
+| `GET` | `/api/reviews/mine` | List the current user's reviews |
+
+For the complete request and response schemas, use the interactive Swagger UI
+at `http://localhost:8000/docs`.
+
+## Development commands
+
+Run frontend type checking and the production build:
 
 ```powershell
+cd frontend
 npm.cmd run typecheck
 npm.cmd run build
 ```
 
----
-
-## 12. Open the API documentation
-
-FastAPI automatically generates interactive API documentation.
-
-Open:
-
-```text
-http://localhost:8000/docs
-```
-
-This page allows you to inspect and test the available API endpoints.
-
-Current/planned endpoints include:
-
-```text
-GET  /health
-```
-
----
-
-## 13. Check the health endpoint
-
-With the application running, open:
-
-```text
-http://localhost:8000/health
-```
-
-Expected response:
-
-```json
-{
-  "status": "ok"
-}
-```
-
----
-
-## 14. Run the tests
-
-Run all tests with:
-
-```bash
-uv run pytest
-```
-
-A successful run should finish without test failures.
-
-Whenever possible, run the tests before opening a pull request.
-
----
-
-## 15. Run the linter
-
-Check the project with Ruff:
-
-```bash
-uv run ruff check .
-```
-
-To automatically fix issues that Ruff can safely correct:
-
-```bash
-uv run ruff check . --fix
-```
-
-Format the code with:
-
-```bash
-uv run ruff format .
-```
-
-Before opening a pull request, it is recommended to run:
-
-```bash
-uv run ruff check .
-uv run pytest
-```
-
----
-
-## 16. Add a new dependency
-
-Do not install project dependencies with plain `pip install`.
-
-Use `uv add` instead.
-
-For example:
-
-```bash
-uv add pandas
-```
-
-For a development-only dependency:
-
-```bash
-uv add --dev pytest
-```
-
-This updates:
-
-```text
-pyproject.toml
-uv.lock
-```
-
-Commit both files when dependency changes are made.
-
----
-
-## 17. Updating your local environment after pulling changes
-
-When another teammate changes project dependencies, pull the latest changes:
-
-```bash
-git pull
-```
-
-Then run:
-
-```bash
-uv sync
-```
-
-This updates your local `.venv` so it matches the versions stored in `uv.lock`.
-
----
-
-## 18. Environment variables
-
-Local environment variables should be stored in:
-
-```text
-.env
-```
-
-Do not commit `.env`.
-
-If the application needs a new environment variable, document its name in:
-
-```text
-.env.example
-```
-
-OpenAI review analysis uses these variables:
-
-```text
-OPENAI_API_KEY=replace-with-your-openai-api-key
-OPENAI_MODEL=gpt-4o-mini
-```
-
-`OPENAI_MODEL` is optional. If it is not set, the application uses `gpt-4o-mini`.
-
-Never place passwords, API keys, tokens, or other secrets directly in Git-tracked files.
-
----
-
-## 19. Files that should not be committed
-
-The following should stay local:
-
-```text
-.venv/
-.env
-__pycache__/
-.pytest_cache/
-.ruff_cache/
-data/raw/*.csv
-data/processed/*.csv
-```
-
-The following should be committed:
-
-```text
-.python-version
-pyproject.toml
-uv.lock
-README.md
-frontend/
-src/
-scripts/
-tests/
-.env.example
-```
-
----
-
-## 20. Quick start
-
-For a teammate setting up the project for the first time, the normal sequence is:
-
-```bash
-git clone <REPOSITORY_URL>
-cd smart-review-ai
-
-uv python install 3.13.15
-uv sync
-```
-
-Download the BoardGameGeek dataset and place:
-
-```text
-bgg-15m-reviews.csv
-```
-
-inside:
-
-```text
-data/raw/
-```
-
-Prepare the data:
-
-```bash
-uv run python scripts/prepare_reviews.py
-```
-
-Run the tests:
-
-```bash
-uv run pytest
-```
-
-Start the API:
-
-```bash
-uv run uvicorn smart_review_ai.main:app --reload --app-dir src
-```
-
-In a second terminal, install and start the frontend:
+Run backend tests:
 
 ```powershell
-cd frontend
-npm.cmd ci
-Copy-Item .env.example .env
-npm.cmd run dev
+uv run pytest
 ```
 
-Then open the frontend:
+Format and lint Python code with Ruff:
 
-```text
-http://localhost:5173
+```powershell
+uv run ruff check .
 ```
 
-The frontend uses `VITE_API_BASE_URL=http://localhost:8000`. Vite proxies
-frontend requests from `/api` to the FastAPI backend, so the connectivity
-check calls `/api/health` and expects `{"status":"ok"}`.
+## Database migrations
 
-The API documentation remains available at:
+When a SQLAlchemy model changes, generate a migration and review it manually:
 
-```text
-http://localhost:8000/docs
+```powershell
+uv run alembic revision --autogenerate -m "describe the schema change"
+uv run alembic upgrade head
 ```
 
----
+Commit migration files together with the model changes. Other developers only
+need to pull the migration and run `uv run alembic upgrade head`.
 
-## 19. Main development pipeline
+## Stopping local services
 
-The project is intended to evolve toward the following flow:
+Stop the SQL Server container without removing its data:
 
-```text
-BoardGameGeek reviews
-        ↓
-Dataset preparation
-        ↓
-Sentiment analysis
-        ↓
-Difficulty classification
-        ↓
-Theme/aspect extraction
-        ↓
-Complaint detection
-        ↓
-Aggregation per game
-        ↓
-Game insights
-        ↓
-FastAPI
+```powershell
+docker compose down
 ```
 
-The initial version can work entirely from prepared local review data. Integration with the main Flower Power application can be added later through the API.
+To remove the container and its persisted volume as well, use this only when
+you intentionally want to reset the local database:
+
+```powershell
+docker compose down -v
+```
+
+## Future improvements
+
+- Add automated insight regeneration when new reviews are imported.
+- Add review editing and deletion.
+- Add richer game recommendations and personalized discovery.
+- Add automated frontend and API integration tests.
+- Add Docker services for the complete application.
