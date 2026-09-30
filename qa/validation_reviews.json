@@ -1,0 +1,122 @@
+[
+  {
+    "id": "VR-001",
+    "review_text": "A fantastic gateway game. The rules are simple, turns are quick, and everyone stays involved. We had a great time.",
+    "expected_outcome": {
+      "sentiment": "positive",
+      "difficulty": "easy",
+      "themes": ["family-friendly", "quick turns", "accessible rules"],
+      "complaints": []
+    }
+  },
+  {
+    "id": "VR-002",
+    "review_text": "The game is enjoyable and the components are attractive. It works well with three players, although the final score felt close to random.",
+    "expected_outcome": {
+      "sentiment": "positive",
+      "difficulty": "medium",
+      "themes": ["components", "three-player experience", "luck"],
+      "complaints": ["final score feels random"]
+    }
+  },
+  {
+    "id": "VR-003",
+    "review_text": "It is neither especially good nor especially bad. The rules are clear, but the game did not leave a strong impression.",
+    "expected_outcome": {
+      "sentiment": "neutral",
+      "difficulty": "easy",
+      "themes": ["clear rules", "average experience"],
+      "complaints": []
+    }
+  },
+  {
+    "id": "VR-004",
+    "review_text": "The idea is interesting, but the game takes too long and the downtime between turns is frustrating. I would not choose it for a casual evening.",
+    "expected_outcome": {
+      "sentiment": "negative",
+      "difficulty": "medium",
+      "themes": ["long play time", "turn downtime", "casual play"],
+      "complaints": ["game takes too long", "too much downtime"]
+    }
+  },
+  {
+    "id": "VR-005",
+    "review_text": "The rulebook is dense and the first game was difficult to understand. Once we learned it, the decisions became rewarding.",
+    "expected_outcome": {
+      "sentiment": "mixed",
+      "difficulty": "hard",
+      "themes": ["dense rulebook", "learning curve", "strategic decisions"],
+      "complaints": ["rules are difficult to understand"]
+    }
+  },
+  {
+    "id": "VR-006",
+    "review_text": "This is a challenging strategy game with several interacting systems. Experienced players will enjoy planning several turns ahead.",
+    "expected_outcome": {
+      "sentiment": "positive",
+      "difficulty": "hard",
+      "themes": ["strategy", "interacting systems", "planning ahead"],
+      "complaints": []
+    }
+  },
+  {
+    "id": "VR-007",
+    "review_text": "Building an efficient engine and managing resources are the best parts. The economic theme comes through clearly in every round.",
+    "expected_outcome": {
+      "sentiment": "positive",
+      "difficulty": "medium",
+      "themes": ["engine building", "resource management", "economic theme"],
+      "complaints": []
+    }
+  },
+  {
+    "id": "VR-008",
+    "review_text": "The artwork is beautiful, but the player elimination feels harsh and the game becomes repetitive after several plays.",
+    "expected_outcome": {
+      "sentiment": "negative",
+      "difficulty": "medium",
+      "themes": ["artwork", "player elimination", "replayability"],
+      "complaints": ["player elimination feels harsh", "game becomes repetitive"]
+    }
+  },
+  {
+    "id": "VR-009",
+    "review_text": "The game is not difficult to learn, and the turns are not excessively long. It is a relaxed choice for new players.",
+    "expected_outcome": {
+      "sentiment": "positive",
+      "difficulty": "easy",
+      "themes": ["new-player friendly", "relaxed play", "short turns"],
+      "complaints": []
+    }
+  },
+  {
+    "id": "VR-010",
+    "review_text": "I expected a deep campaign, but the scenarios are short and the story is barely developed. The components are fine, though.",
+    "expected_outcome": {
+      "sentiment": "negative",
+      "difficulty": "medium",
+      "themes": ["campaign", "scenarios", "story"],
+      "complaints": ["scenarios are too short", "story is underdeveloped"]
+    }
+  },
+  {
+    "id": "VR-011",
+    "review_text": "With two players it feels tense and tactical; with four, the waiting time is noticeable. I am unsure which player count I prefer.",
+    "expected_outcome": {
+      "sentiment": "ambiguous",
+      "difficulty": "medium",
+      "themes": ["player count", "tactical play", "waiting time"],
+      "complaints": ["waiting time increases with four players"]
+    }
+  },
+  {
+    "id": "VR-012",
+    "review_text": "The game looks impressive on the table, and I wanted to like it, but the scoring system is confusing and the ending was anticlimactic.",
+    "expected_outcome": {
+      "sentiment": "mixed",
+      "difficulty": "medium",
+      "themes": ["table presence", "scoring", "game ending"],
+      "complaints": ["scoring system is confusing", "ending is anticlimactic"]
+    }
+  }
+]
