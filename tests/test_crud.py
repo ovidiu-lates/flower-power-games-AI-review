@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -11,6 +12,7 @@ from smart_review_ai.models.game_insight import GameInsight
 from smart_review_ai.models.game_insight_complaint import GameInsightComplaint
 from smart_review_ai.models.game_insight_liked_aspect import GameInsightLikedAspect
 from smart_review_ai.models.review import Review
+from smart_review_ai.models.user import User
 
 
 def auth_headers(token: str) -> dict[str, str]:
@@ -463,6 +465,92 @@ def test_game_scoped_review_rejects_unknown_game(
         headers=auth_headers(token),
     )
     assert response.status_code == 404
+
+
+@pytest.mark.parametrize(
+    ("sort", "expected_ids"),
+    [
+        (None, [3, 1, 4, 2]),
+        ("highest_rating", [4, 2, 3, 1]),
+        ("lowest_rating", [3, 1, 4, 2]),
+    ],
+)
+def test_game_reviews_can_be_sorted(
+    authenticated_client: tuple[TestClient, str],
+    db_session: Session,
+    sort: str | None,
+    expected_ids: list[int],
+) -> None:
+    client, token = authenticated_client
+    game = create_game(client, token)
+    user = db_session.scalar(select(User).where(User.username == "boardgamer"))
+    assert user is not None
+
+    february = datetime(2025, 2, 1, tzinfo=UTC)
+    january = datetime(2025, 1, 1, tzinfo=UTC)
+    reviews = [
+        Review(
+            id=UUID(int=1),
+            user_id=user.id,
+            game_id=UUID(game["id"]),
+            rating=6,
+            content="Review one",
+            created_at=february,
+            updated_at=february,
+        ),
+        Review(
+            id=UUID(int=2),
+            user_id=user.id,
+            game_id=UUID(game["id"]),
+            rating=10,
+            content="Review two",
+            created_at=january,
+            updated_at=january,
+        ),
+        Review(
+            id=UUID(int=3),
+            user_id=user.id,
+            game_id=UUID(game["id"]),
+            rating=6,
+            content="Review three",
+            created_at=february,
+            updated_at=february,
+        ),
+        Review(
+            id=UUID(int=4),
+            user_id=user.id,
+            game_id=UUID(game["id"]),
+            rating=10,
+            content="Review four",
+            created_at=january,
+            updated_at=january,
+        ),
+    ]
+    db_session.add_all(reviews)
+    db_session.commit()
+
+    query = f"?sort={sort}" if sort is not None else ""
+    response = client.get(
+        f"/api/games/{game['id']}/reviews{query}",
+        headers=auth_headers(token),
+    )
+
+    assert response.status_code == 200
+    assert [UUID(review["id"]).int for review in response.json()] == expected_ids
+
+
+def test_game_reviews_reject_invalid_sort(
+    authenticated_client: tuple[TestClient, str],
+) -> None:
+    client, token = authenticated_client
+    game = create_game(client, token)
+
+    response = client.get(
+        f"/api/games/{game['id']}/reviews?sort=unknown",
+        headers=auth_headers(token),
+    )
+
+    assert response.status_code == 422
 
 
 def test_game_insight_retrieval_includes_nested_children(

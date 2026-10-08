@@ -1,3 +1,4 @@
+from typing import Literal
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -47,9 +48,13 @@ class ReviewService:
             raise EntityNotFoundError("Review not found")
         return review
 
-    def list_reviews_for_game(self, game_id: UUID) -> list[Review]:
+    def list_reviews_for_game(
+        self,
+        game_id: UUID,
+        sort: Literal["newest", "highest_rating", "lowest_rating"] = "newest",
+    ) -> list[Review]:
         self._require_game(game_id)
-        return self.reviews.list_by_game_id(game_id)
+        return self.reviews.list_by_game_id(game_id, sort=sort)
 
     def list_reviews_for_user(self, user_id: UUID) -> list[Review]:
         return self.reviews.list_by_user_id(user_id)
