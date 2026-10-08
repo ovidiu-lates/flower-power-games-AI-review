@@ -1,5 +1,6 @@
 export type Difficulty = "easy" | "medium" | "hard";
 export type Sentiment = "positive" | "mixed" | "neutral" | "negative";
+export type ReviewSort = "newest" | "highest_rating" | "lowest_rating";
 
 export type Game = {
   id: string;

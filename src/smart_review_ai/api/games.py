@@ -87,9 +87,12 @@ def list_game_reviews(
     game_id: UUID,
     session: SessionDependency,
     _: AuthDependency,
+    sort: Literal["newest", "highest_rating", "lowest_rating"] = Query(
+        default="newest"
+    ),
 ) -> list[ReviewResponse]:
     try:
-        return ReviewService(session).list_reviews_for_game(game_id)
+        return ReviewService(session).list_reviews_for_game(game_id, sort=sort)
     except EntityNotFoundError as error:
         raise _not_found(error) from error
 

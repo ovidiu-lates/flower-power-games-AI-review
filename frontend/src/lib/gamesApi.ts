@@ -4,6 +4,7 @@ import type {
   GameInsight,
   PaginatedGamesResponse,
   Review,
+  ReviewSort,
   UserReview,
 } from "../types/game";
 import { apiRequest, ApiError } from "./api";
@@ -58,10 +59,16 @@ export async function getGameInsight(
   }
 }
 
-export async function getGameReviews(gameId: string, page = 1, pageSize = 5) {
+export async function getGameReviews(
+  gameId: string,
+  page = 1,
+  pageSize = 5,
+  sort: ReviewSort = "newest",
+) {
   const query = new URLSearchParams({
     page: String(page),
     page_size: String(pageSize),
+    sort,
   });
   const response = await apiRequest<
     { items: Review[]; page: number; page_size: number; total: number; total_pages: number } | Review[]
