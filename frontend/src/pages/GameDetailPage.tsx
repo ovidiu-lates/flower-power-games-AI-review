@@ -81,7 +81,61 @@ export default function GameDetailPage() {
       </header>
       <div className="game-content"><div className="game-content__main">
         {insight ? <InsightsPanel insight={insight} /> : <section className="panel empty-insight"><h2>Insights are still gathering</h2><p>There is not enough analyzed review data for this game yet.</p></section>}
-        <section className="reviews-section"><div className="section-heading"><div><span className="eyebrow">From the community</span><h2>Player reviews</h2></div><div className="review-controls"><label className="review-sort">Sort reviews<select className="filter-select" value={reviewSort} onChange={(event) => handleReviewSortChange(event.currentTarget.value)}><option value="newest">Newest first</option><option value="highest_rating">Highest rating</option><option value="lowest_rating">Lowest rating</option></select></label><button className="button button--secondary" onClick={() => setReviewOpen(true)}><PenLine size={16} /> Add yours</button></div></div><div className="review-list">{reviews?.items.map((review) => <ReviewCard review={review} key={review.id} />)}{reviews?.items.length === 0 && <div className="state-message">No reviews yet. Start the conversation.</div>}</div>{reviews && reviews.total_pages > 1 && <nav className="pagination" aria-label="Review pages"><button className="icon-button" disabled={page === 1} onClick={() => setPage((value) => value - 1)} aria-label="Previous page"><ChevronLeft /></button><span>Page {reviews.page} of {reviews.total_pages}</span><button className="icon-button" disabled={page === reviews.total_pages} onClick={() => setPage((value) => value + 1)} aria-label="Next page"><ChevronRight /></button></nav>}</section>
+        <section className="reviews-section">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">From the community</span>
+              <h2>Player reviews</h2>
+            </div>
+            <div className="review-controls">
+              <select
+                aria-label="Sort reviews"
+                className={reviewSort ? "filter-select active" : "filter-select"}
+                value={reviewSort}
+                onChange={(event) => handleReviewSortChange(event.currentTarget.value)}
+              >
+                <option value="newest">Newest first</option>
+                <option value="highest_rating">Highest rating</option>
+                <option value="lowest_rating">Lowest rating</option>
+              </select>
+              <button
+                className="button button--secondary"
+                onClick={() => setReviewOpen(true)}
+              >
+                <PenLine size={16} /> Add yours
+              </button>
+            </div>
+          </div>
+          <div className="review-list">
+            {reviews?.items.map((review) => (
+              <ReviewCard review={review} key={review.id} />
+            ))}
+            {reviews?.items.length === 0 && (
+              <div className="state-message">No reviews yet. Start the conversation.</div>
+            )}
+          </div>
+          {reviews && reviews.total_pages > 1 && (
+            <nav className="pagination" aria-label="Review pages">
+              <button
+                className="icon-button"
+                disabled={page === 1}
+                onClick={() => setPage((value) => value - 1)}
+                aria-label="Previous page"
+              >
+                <ChevronLeft />
+              </button>
+              <span>Page {reviews.page} of {reviews.total_pages}</span>
+              <button
+                className="icon-button"
+                disabled={page === reviews.total_pages}
+                onClick={() => setPage((value) => value + 1)}
+                aria-label="Next page"
+              >
+                <ChevronRight />
+              </button>
+            </nav>
+          )}
+        </section>
       </div><aside className="game-aside"><section className="panel quick-facts"><span className="eyebrow">At a glance</span><h2>Game details</h2><dl><div><dt>Players</dt><dd>{game.min_players}-{game.max_players}</dd></div><div><dt>Play time</dt><dd>{game.min_play_time}-{game.max_play_time} min</dd></div><div><dt>Community rating</dt><dd>{insight ? `${insight.average_rating.toFixed(1)}/10` : "Pending"}</dd></div><div><dt>Reviews analyzed</dt><dd>{insight?.total_reviews.toLocaleString() ?? "0"}</dd></div></dl></section><section className="review-cta"><PenLine size={23} /><h2>Played this one?</h2><p>Add your experience to sharpen the community insight.</p><button className="button button--light" onClick={() => setReviewOpen(true)}>Write a review</button></section></aside></div>
       {reviewOpen && <WriteReviewModal gameId={game.id} gameName={game.name} onClose={() => setReviewOpen(false)} onCreated={refreshAfterReview} />}
     </main>
